@@ -15,6 +15,7 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@babel/runtime": "^7.27.6",
     "@coinbase/wallet-mobile-sdk": "^1.1.2",
     "@expo/vector-icons": "^14.0.2",
     "@hookform/resolvers": "^5.0.1",
@@ -74,7 +75,7 @@
     "zustand": "^5.0.4"
   },
   "devDependencies": {
-    "@babel/core": "^7.25.2",
+    "@babel/core": "^7.27.4",
     "@react-native-community/cli": "latest",
     "@types/jest": "^29.5.12",
     "@types/react": "~18.3.12",

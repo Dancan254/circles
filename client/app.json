@@ -1,0 +1,60 @@
+{
+  "expo": {
+    "name": "ChamaDAO",
+    "slug": "chamadao",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/Subtract.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.chamadao",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/Subtract.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.anonymous.chamadao",
+      "permissions": ["android.permission.RECORD_AUDIO"]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/Subtract.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/Subtract.png",
+          "resizeMode": "cover"
+        }
+      ],
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your friends."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "67a78265-c21c-43fc-88b7-05f6cdb380ef"
+      }
+    }
+  }
+}

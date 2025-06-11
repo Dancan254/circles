@@ -1,39 +1,39 @@
 {
   "expo": {
-    "name": "ChamaDAO",
-    "slug": "chamadao",
+    "name": "Circles",
+    "slug": "circles",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/Subtract.png",
+    "icon": "./assets/images/logo.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.chamadao",
+      "bundleIdentifier": "com.sylusabel.circles",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/Subtract.png",
+        "foregroundImage": "./assets/images/logo.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.chamadao",
+      "package": "com.sylusabel.circles",
       "permissions": ["android.permission.RECORD_AUDIO"]
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/Subtract.png"
+      "favicon": "./assets/images/logo.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/Subtract.png",
+          "image": "./assets/images/logo.png",
           "resizeMode": "cover"
         }
       ],

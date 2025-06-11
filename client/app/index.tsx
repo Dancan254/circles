@@ -16,13 +16,13 @@ const index = () => {
       <View style={styles.bannerContainer}>
         <Image
           style={styles.bannerImage}
-          source={require("../assets/images/Subtract.png")}
+          source={require("../assets/images/logo.png")}
         />
       </View>
       <View style={styles.welcomeContainer}>
-        <Text style={styles.welcomeText}>Welcome to ChamaDAO</Text>
+        <Text style={styles.welcomeText}>Welcome to Circles</Text>
         <Text style={styles.welcomeText2}>
-          A decentralized platform inspired by Kenya’s trusted chamas.
+          Join a Cross-Chain Savings Pool, and Grow Your USDC.
         </Text>
       </View>
       <View style={styles.buttonContainer}>
@@ -74,6 +74,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
+    backgroundColor: "#f6f7f9",
   },
   bannerContainer: {
     marginTop: 32,

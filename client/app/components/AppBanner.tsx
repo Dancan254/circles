@@ -12,11 +12,11 @@ const AppBanner = () => {
     >
       <View style={styles.container}>
         <Image
-          source={require("../../assets/images/Union.png")}
+          source={require("../../assets/images/logo.png")}
           style={styles.logo}
         />
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>The ChamaDAO</Text>
+          <Text style={styles.title}>Circles</Text>
         </View>
       </View>
     </View>
@@ -30,18 +30,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     borderColor: "#A3A1A1",
     borderWidth: 1,
-    backgroundColor: "#f0f7f9",
-    borderRadius: 15,
+    backgroundColor: "#f6f7f9",
+    borderRadius: 40,
     alignItems: "center",
-    paddingVertical: 10,
+    paddingVertical: 1,
     paddingHorizontal: 10,
     justifyContent: "center",
     width: 200,
   },
   logo: {
-    width: 20,
-    height: 20,
-    objectFit: "contain",
+    width: 30,
+    height: 30,
+    objectFit: "cover",
   },
   titleContainer: {
     marginLeft: 4,

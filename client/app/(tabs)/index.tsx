@@ -64,11 +64,17 @@ const Home = () => {
   const activeAccount = useActiveAccount();
   const [userIsPartOfAChama, setUserIsPartOfAChama] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(0);
-  const { data: userData } = useGetUser(activeAccount!.address) as {
+
+  const { data: userData, isLoading: userLoading } = useGetUser(
+    activeAccount?.address
+  ) as {
     data: UserData;
+    isLoading: boolean;
   };
-  const chamaAddress = userData?.memberChamas[0]?.chamaAddress;
-  const { data: chamaData } = useGetChama(chamaAddress as string);
+
+  const chamaAddress = userData?.memberChamas?.[0]?.chamaAddress;
+  const { data: chamaData, isLoading: chamaLoading } =
+    useGetChama(chamaAddress);
 
   const navigator = (action: string) => {
     switch (action) {
@@ -88,7 +94,7 @@ const Home = () => {
   };
 
   useEffect(() => {
-    if (userData?.memberChamas.length > 0) {
+    if (userData?.memberChamas?.length > 0) {
       setUserIsPartOfAChama(true);
     }
     // get onboarding step from local storage
@@ -105,7 +111,7 @@ const Home = () => {
     console.log(activeAccount?.address);
   }
 
-  if (!userData) {
+  if (!activeAccount || userLoading || !userData) {
     return (
       <View
         style={{
@@ -116,6 +122,17 @@ const Home = () => {
       >
         <StatusBar style="dark" />
         <ActivityIndicator size="large" color={colors.accent} />
+      </View>
+    );
+  }
+
+  if (userData?.memberChamas?.length === 0 && onboardingStep === 0) {
+    return (
+      <View style={styles.container}>
+        <Text>No Chama</Text>
+        <TouchableOpacity onPress={() => router.navigate("/onboard")}>
+          <Text>Onboard</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -131,7 +148,7 @@ const Home = () => {
           </View>
           <View style={styles.accountBalanceContainer}>
             <TouchableOpacity onPress={handleClick}>
-              <AccountProvider client={client} address={activeAccount!.address}>
+              <AccountProvider client={client} address={activeAccount.address}>
                 <AccountBalance style={styles.accountBalance} />
               </AccountProvider>
             </TouchableOpacity>
@@ -148,7 +165,7 @@ const Home = () => {
             </TouchableOpacity>
           </View>
         </View>
-        {userData?.memberChamas.length > 0 && (
+        {userData?.memberChamas?.length > 0 && (
           <View style={styles.bgImageContainer}>
             <ImageBackground
               source={bgImage}
@@ -211,7 +228,7 @@ const Home = () => {
             </ImageBackground>
           </View>
         )}
-        {onboardingStep < 3 && (
+        {onboardingStep < 3 && onboardingSteps[onboardingStep] && (
           <>
             <View style={styles.nextStepContainer}>
               <View style={styles.nextStepTextContainer}>

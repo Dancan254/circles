@@ -54,9 +54,9 @@ const onboard = () => {
                 }}
               />
             ),
-            title: "Welcome to ChamaDAO",
+            title: "Welcome to Circles",
             subtitle:
-              "ChamaDAO is a decentralized platform that empowers communities to pool funds, invest together, and grow wealth collectively.",
+              "Circles is a decentralized platform that empowers communities to pool funds, invest together, and grow wealth collectively.",
           },
           {
             backgroundColor: colors.primary,
@@ -107,7 +107,7 @@ const onboard = () => {
             ),
             title: "Get Started",
             subtitle:
-              "Create an account, join or create a Chama, and collaborate for a brighter, decentralized financial future",
+              "Create an account, join or create a Circle, and collaborate for a brighter, decentralized financial future",
           },
         ]}
       />

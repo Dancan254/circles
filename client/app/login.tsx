@@ -36,10 +36,10 @@ const Page = () => {
         options: "smartWalletOnly",
       },
       appMetadata: {
-        name: "The ChamaDAO",
+        name: "Circles",
         description: "The complete savings platform for EVERYONE!",
-        url: "https://www.thechamadao.xyz",
-        logoUrl: "https://www.thechamadao.xyz/logo.svg",
+        url: "https://www.circles.xyz",
+        logoUrl: require("../assets/images/logo.png"),
       },
     }),
   ];

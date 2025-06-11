@@ -33,7 +33,7 @@ const register = () => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [idNumber, setIdNumber] = useState("39296079");
-  const [mobileNumber, setPhoneNumber] = useState("+712345678");
+  const [mobileNumber, setPhoneNumber] = useState("701838690");
   const [country, setCountry] = useState("ke");
   const [role, setRole] = useState("member");
   const [isLoading, setIsLoading] = useState(false);
@@ -57,7 +57,7 @@ const register = () => {
       return;
     }
     try {
-      console.log("Registration successful");
+      console.log("Registration successful!");
       // save user details to local storage
       AsyncStorage.setItem(
         "userRegistrationDetails",

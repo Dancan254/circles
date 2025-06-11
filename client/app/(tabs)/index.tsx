@@ -126,17 +126,6 @@ const Home = () => {
     );
   }
 
-  if (userData?.memberChamas?.length === 0 && onboardingStep === 0) {
-    return (
-      <View style={styles.container}>
-        <Text>No Chama</Text>
-        <TouchableOpacity onPress={() => router.navigate("/onboard")}>
-          <Text>Onboard</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
@@ -204,7 +193,7 @@ const Home = () => {
                 <View style={styles.contributionAmountContainer}>
                   <View style={styles.contributionAmountTitleContainer}>
                     <Text style={styles.contributionAmountTitle}>
-                      Chama Loans
+                      Circle Loans
                     </Text>
                     <TouchableOpacity
                       style={styles.contributionAmountTitleButton}
@@ -305,7 +294,7 @@ const Home = () => {
                   style={styles.chamaActionButtonIcon}
                   contentFit="contain"
                 />
-                <Text style={styles.quickActionItemText}>Create a Chama</Text>
+                <Text style={styles.quickActionItemText}>Create a Circle</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.chamaActionButton}
@@ -316,14 +305,14 @@ const Home = () => {
                   style={styles.chamaActionButtonIcon}
                   contentFit="contain"
                 />
-                <Text style={styles.quickActionItemText}>Join a Chama</Text>
+                <Text style={styles.quickActionItemText}>Join a Circle</Text>
               </TouchableOpacity>
             </View>
           )}
         </View>
         <View style={styles.trendingChamasContainer}>
           <View style={styles.trendingChamasHeader}>
-            <Text style={styles.trendingChamasTitle}>Trending Chamas</Text>
+            <Text style={styles.trendingChamasTitle}>Trending Circles</Text>
             <TouchableOpacity
               style={styles.trendingChamasButton}
               onPress={() => router.push("/chama/join")}

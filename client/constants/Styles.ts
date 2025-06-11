@@ -12,13 +12,11 @@ const myChama = require("../assets/images/mychama.svg");
 const myLoans = require("../assets/images/loan.svg");
 const myContributions = require("../assets/images/pay.svg");
 const joinChama = require("../assets/images/join.svg");
-const payLoan = require("../assets/images/payloan.svg");
 const createChama = require("../assets/images/create.svg");
 const meeting = require("../assets/images/meeting.svg");
 const settings = require("../assets/images/settings.svg");
 
 const usdc = require("../assets/images/usdc.svg");
-const kshc = require("../assets/images/kshc.svg");
 const eth = require("../assets/images/eth-logo.svg");
 const transactions = require("../assets/images/transactions.png");
 const user = require("../assets/images/badge.png");
@@ -65,7 +63,7 @@ export const countryFlags = {
 
 export const quickActions = [
   {
-    name: "My Chama",
+    name: "My Circle",
     icon: myChama,
     route: "/mychama",
   },
@@ -113,8 +111,8 @@ export const trendingChamas = [
 export const notifications = [
   {
     id: "1",
-    title: "Welcome to ChamaDAO",
-    message: "You are now a member of ChamaDAO.",
+    title: "Welcome to Circles",
+    message: "You are now a member of the Circles community.",
     read: false,
     createdAt: new Date().toDateString(),
     icon: require("../assets/images/Subtract.png"),
@@ -129,7 +127,7 @@ export const chamaActions = [
     description: "View contribution history of the chama.",
   },
   {
-    title: "Chama Loans",
+    title: "Circle Loans",
     route: "chama/loans",
     icon: myLoans,
     description: "An overview of the chama's loan details.",
@@ -147,13 +145,13 @@ export const chamaActions = [
     description: "View all meetings and their details.",
   },
   {
-    title: "Chama Profile",
+    title: "Circle Profile",
     route: "chama/profile",
     icon: createChama,
     description: "View the full chama profile",
   },
   {
-    title: "Leave Chama",
+    title: "Leave Circle",
     route: "chama/leave",
     icon: settings,
     description: "Leave the chama",
@@ -244,18 +242,18 @@ export const tokenAddresses = {
 
 export const onboardingSteps = [
   {
-    title: "Create / Join a Chama",
-    description: "Create a chama to start saving and borrowing.",
+    title: "Create / Join a Circle",
+    description: "Create a circle to start saving and borrowing.",
     icon: createChama,
   },
   {
     title: "Make a Contribution",
-    description: "Make a contribution to the chama.",
+    description: "Make a contribution to the circle.",
     icon: myContributions,
   },
   {
     title: "Request a Loan",
-    description: "Request a loan from the chama.",
+    description: "Request a loan from the circle.",
     icon: myLoans,
   },
 ];

@@ -6,7 +6,6 @@ import {
   Dimensions,
   TouchableOpacity,
   ScrollView,
-  Modal,
   Alert,
 } from "react-native";
 import React, { useState, useEffect } from "react";
@@ -15,15 +14,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { tokenAddresses, tokens } from "@/constants/Styles";
 import Token, { TokenProps } from "../components/Token";
 import { BlurView } from "expo-blur";
-import { Image } from "expo-image";
 const { width } = Dimensions.get("window");
 import {
   ConnectButton,
   lightTheme,
   useActiveAccount,
   useWalletBalance,
-  PayEmbed,
   useConnect,
+  useDisconnect,
 } from "thirdweb/react";
 import { baseSepolia, defineChain } from "thirdweb/chains";
 import { client } from "@/utils/client";
@@ -45,12 +43,8 @@ export interface TokenBalance {
 const Wallet = () => {
   const [isBalanceHidden, setIsBalanceHidden] = useState(false);
   const activeAccount = useActiveAccount();
-  const [depositModal, setDepositModal] = useState(false);
-  const [showThirdwebModal, setShowThirdwebModal] = useState(false);
-  const [depositMethod, setDepositMethod] = useState<"wallet" | "mpesa">(
-    "mpesa"
-  );
   const { connect } = useConnect();
+  const { disconnect } = useDisconnect();
 
   const ethBalanceResult = activeAccount?.address
     ? useWalletBalance({
@@ -125,16 +119,6 @@ const Wallet = () => {
     inAppWallet(),
   ];
 
-  const handleAddFunds = () => {
-    if (activeAccount) {
-      // If wallet is connected, show Thirdweb Pay embed for funding
-      setShowThirdwebModal(true);
-    } else {
-      // If wallet not connected, show connection modal
-      setDepositModal(true);
-    }
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -196,23 +180,47 @@ const Wallet = () => {
               </TouchableOpacity>
             </View>
           </View>
-          <View style={styles.actionContainer}>
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={handleAddFunds}
-            >
-              <Ionicons name="add" size={24} color={colors.chamaBlack} />
-              <Text style={styles.actionButtonText}>Add funds</Text>
-            </TouchableOpacity>
-            <View style={styles.divider}></View>
-            <TouchableOpacity style={styles.actionButton}>
-              <Ionicons
-                name="arrow-down-outline"
-                size={24}
-                color={colors.chamaBlack}
-              />
-              <Text style={styles.actionButtonText}>Withdraw</Text>
-            </TouchableOpacity>
+
+          <View
+            style={{
+              marginTop: 4,
+              width: width * 0.88,
+              marginBottom: 8,
+            }}
+          >
+            <ConnectButton
+              client={client}
+              theme={lightTheme({
+                colors: {
+                  primaryButtonBg: colors.chamaBlack,
+                  primaryButtonText: "white",
+                  secondaryButtonText: colors.chamaBlack,
+                },
+                fontFamily: "JakartSemiBold",
+              })}
+              wallets={wallets}
+              chain={defineChain(baseSepolia)}
+              connectButton={{
+                label: "Transact",
+                style: {
+                  backgroundColor: "transparent",
+                  color: colors.chamaGreen,
+                  border: "none",
+                  fontSize: 14,
+                  fontWeight: "bold",
+                  fontFamily: "JakartSemiBold",
+                  borderRadius: 16,
+                },
+              }}
+              connectModal={{
+                title: "My Wallet",
+                size: "wide",
+                showThirdwebBranding: true,
+              }}
+              detailsModal={{
+                showTestnetFaucet: true,
+              }}
+            />
           </View>
         </View>
         <View style={styles.tokensContainer}>
@@ -230,136 +238,6 @@ const Wallet = () => {
           </Text>
         </View>
       </ScrollView>
-      <Modal visible={depositModal} transparent animationType="fade">
-        <BlurView intensity={20} tint="light" style={styles.overlay}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Choose a Deposit Method</Text>
-              <TouchableOpacity onPress={() => setDepositModal(false)}>
-                <Ionicons name="close" size={24} color={colors.accent} />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.modalContent}>
-              <TouchableOpacity
-                onPressIn={() => setDepositMethod("mpesa")}
-                style={[
-                  styles.depositMethod,
-                  {
-                    backgroundColor:
-                      depositMethod === "mpesa" ? "#E7E7E7FF" : "transparent",
-                  },
-                ]}
-              >
-                <Image
-                  source={require("@/assets/images/mpesa.png")}
-                  style={styles.mpesaIcon}
-                  contentFit="contain"
-                />
-                <Text style={styles.depositMethodText}>M-Pesa</Text>
-                <Ionicons
-                  name="checkmark-outline"
-                  size={24}
-                  color={
-                    depositMethod === "mpesa" ? colors.accent : "transparent"
-                  }
-                />
-              </TouchableOpacity>
-              <ConnectButton
-                client={client}
-                theme={lightTheme({
-                  colors: {
-                    modalBg: "#f0f7f9",
-                    modalOverlayBg: "#f0f7f9",
-                    primaryButtonBg: "#f0f7f9",
-                    primaryButtonText: colors.chamaBlack,
-                  },
-                  fontFamily: "Poppins",
-                })}
-                wallets={wallets}
-                chain={defineChain(baseSepolia)}
-                connectButton={{
-                  label: "Create a Smart Wallet",
-                }}
-                connectModal={{
-                  title: "Connect Wallet",
-                  titleIcon: "https://www.thechamadao.xyz/logo.svg",
-                  size: "compact",
-                }}
-                onConnect={() => {
-                  setDepositModal(false);
-                  // Optionally show the funding modal after connection
-                  setTimeout(() => setShowThirdwebModal(true), 500);
-                }}
-              />
-              <TouchableOpacity style={styles.depositButton}>
-                <Text style={styles.depositButtonText}>Confirm</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </BlurView>
-      </Modal>
-
-      {/* Thirdweb Wallet Modal for Funding */}
-      <Modal visible={showThirdwebModal} transparent animationType="slide">
-        <View style={styles.thirdwebModalContainer}>
-          <View style={styles.thirdwebModalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Add Funds to Wallet</Text>
-              <TouchableOpacity onPress={() => setShowThirdwebModal(false)}>
-                <Ionicons name="close" size={24} color={colors.accent} />
-              </TouchableOpacity>
-            </View>
-
-            {activeAccount && (
-              <View style={styles.walletInfo}>
-                <View style={styles.walletIconContainer}>
-                  <Ionicons name="wallet" size={40} color={colors.primary} />
-                </View>
-                <Text style={styles.walletAddress}>
-                  {activeAccount.address?.slice(0, 6)}...
-                  {activeAccount.address?.slice(-4)}
-                </Text>
-                <Text style={styles.balanceText}>0 ETH</Text>
-
-                <View style={styles.actionButtons}>
-                  <TouchableOpacity style={styles.actionBtn}>
-                    <Ionicons name="send" size={20} color={colors.chamaBlack} />
-                    <Text style={styles.actionBtnText}>Send</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity style={styles.actionBtn}>
-                    <Ionicons
-                      name="download"
-                      size={20}
-                      color={colors.chamaBlack}
-                    />
-                    <Text style={styles.actionBtnText}>Receive</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <TouchableOpacity style={styles.networkSelector}>
-                  <View style={styles.networkIcon} />
-                  <Text style={styles.networkText}>Base Sepolia</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.menuItem}>
-                  <Ionicons name="layers" size={20} color={colors.chamaBlack} />
-                  <Text style={styles.menuItemText}>View Funds</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.menuItem}>
-                  <Ionicons
-                    name="log-out"
-                    size={20}
-                    color={colors.chamaBlack}
-                  />
-                  <Text style={styles.menuItemText}>Disconnect Wallet</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 };
@@ -380,7 +258,7 @@ const styles = StyleSheet.create({
   },
   walletContainer: {
     width: width * 0.9,
-    height: width * 0.58,
+    height: width * 0.6,
     backgroundColor: colors.chamaGreen,
     borderRadius: 16,
     marginTop: 16,
@@ -485,73 +363,6 @@ const styles = StyleSheet.create({
     color: colors.chamaBlack,
     fontFamily: "JakartaRegular",
   },
-  overlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContainer: {
-    backgroundColor: "#f0f7f9",
-    borderRadius: 10,
-    padding: 16,
-    width: width * 0.9,
-    borderWidth: 1,
-    borderColor: colors.chamaBlue,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 10,
-  },
-  modalTitle: {
-    fontFamily: "MontserratAlternates",
-    fontSize: 16,
-    color: colors.chamaBlack,
-  },
-  modalText: {
-    fontFamily: "JakartaRegular",
-    fontSize: 14,
-    color: colors.chamaBlack,
-    lineHeight: 24,
-  },
-  mpesaIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
-  depositMethod: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.chamaBlue,
-  },
-  depositMethodText: {
-    fontFamily: "JakartaRegular",
-    fontSize: 14,
-    color: colors.chamaBlack,
-  },
-  modalContent: {
-    flexDirection: "column",
-    gap: 16,
-    marginVertical: 10,
-  },
-  depositButton: {
-    backgroundColor: colors.chamaBlack,
-    padding: 16,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 10,
-  },
-  depositButtonText: {
-    fontFamily: "JakartaRegular",
-    fontSize: 14,
-    color: colors.chamaGray,
-  },
   transactionsContainer: {
     marginHorizontal: 16,
     marginTop: 32,
@@ -570,95 +381,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginVertical: 10,
   },
-  thirdwebModalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  thirdwebModalContent: {
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 20,
-    width: width * 0.9,
-    maxHeight: width * 1.2,
-  },
-  walletInfo: {
-    alignItems: "center",
-    paddingVertical: 20,
-  },
-  walletIconContainer: {
-    backgroundColor: colors.primary,
-    borderRadius: 25,
-    padding: 12,
-    marginBottom: 10,
-  },
-  walletAddress: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: colors.chamaBlack,
-    fontFamily: "MontserratAlternates",
-    marginBottom: 5,
-  },
-  balanceText: {
-    fontSize: 14,
-    color: colors.chamaGray,
-    fontFamily: "JakartaRegular",
-    marginBottom: 20,
-  },
-  actionButtons: {
+  addFundsContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    alignItems: "center",
     width: "100%",
-    marginBottom: 20,
-  },
-  actionBtn: {
-    flexDirection: "row",
-    alignItems: "center",
     gap: 8,
-    padding: 12,
-    borderRadius: 12,
-    backgroundColor: "#f5f5f5",
-    flex: 1,
-    marginHorizontal: 5,
-    justifyContent: "center",
-  },
-  actionBtnText: {
-    fontFamily: "JakartSemiBold",
-    fontSize: 14,
-    color: colors.chamaBlack,
-  },
-  networkSelector: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    padding: 12,
-    width: "100%",
-    marginBottom: 10,
-  },
-  networkIcon: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: colors.primary,
-  },
-  networkText: {
-    fontFamily: "JakartSemiBold",
-    fontSize: 14,
-    color: colors.chamaBlack,
-  },
-  menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    padding: 16,
-    width: "100%",
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderColor: "#e5e5e5",
-  },
-  menuItemText: {
-    fontFamily: "JakartaRegular",
-    fontSize: 16,
-    color: colors.chamaBlack,
+    paddingHorizontal: 16,
   },
 });

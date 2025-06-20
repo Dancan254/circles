@@ -135,8 +135,8 @@ contract Circle is AccessControl, VRFConsumerBaseV2Plus {
 
     // @param enableNativePayment: Set to `true` to enable payment in native tokens, or
     // `false` to pay in LINK
-    function requestRandomWords(bool enableNativePayment) external onlyOwner returns (uint256 requestId) {
-        if (lastPayoutDate + payoutPeriod > block.timestamp) {
+    function requestRandomWords(bool enableNativePayment) external returns (uint256 requestId) {
+        if (getNextPayoutDate() > block.timestamp) {
             revert PayoutPeriodNotReached(lastPayoutDate, payoutPeriod);
         }
         // Will revert if subscription is not set and funded.
@@ -174,7 +174,7 @@ contract Circle is AccessControl, VRFConsumerBaseV2Plus {
         return (request.fulfilled, request.randomWords);
     }
 
-    function getNextPayoutDate() external view returns (uint256) {
+    function getNextPayoutDate() public view returns (uint256) {
         return lastPayoutDate + payoutPeriod; // Example: next payout in 30 days
     }
 }

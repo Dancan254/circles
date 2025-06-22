@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity ^0.8.20;
 
 import {CCIPReceiver} from "@chainlink/contracts-ccip/contracts/applications/CCIPReceiver.sol";
 import {Client} from "@chainlink/contracts-ccip/contracts/libraries/Client.sol";
 import {IERC20BurnMint, IERC20} from "src/interfaces/IERC20BurnMint.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {OwnerIsCreator} from "@chainlink/contracts/src/v0.8/shared/access/OwnerIsCreator.sol";
+import {ILogAutomation, Log} from "@chainlink/contracts/src/v0.8/automation/interfaces/ILogAutomation.sol";
 import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import {IRouterClient} from "@chainlink/contracts-ccip/contracts/interfaces/IRouterClient.sol";
 /// @title YieldExecutor - Executes yield strategies on destination chains
 /// @notice Receives cross-chain messages and deploys funds to high-yield protocols
 
-contract YieldExecutor is CCIPReceiver, OwnerIsCreator {
+contract YieldExecutor is CCIPReceiver, OwnerIsCreator, ILogAutomation {
     using SafeERC20 for IERC20;
 
     // Custom errors
@@ -36,6 +37,9 @@ contract YieldExecutor is CCIPReceiver, OwnerIsCreator {
 
     event ProtocolUpdated(address indexed protocol, bool supported);
     event DispatcherUpdated(uint64 indexed chainSelector, address dispatcher);
+    event WithdrawalRequested(
+        address indexed token, uint256 indexed amount, address indexed receiver, uint64 sourceChain
+    );
 
     // State variables
 
@@ -211,7 +215,7 @@ contract YieldExecutor is CCIPReceiver, OwnerIsCreator {
             _deployToDefaultProtocol(_token, _amount);
         } else if (keccak256(abi.encodePacked(_action)) == keccak256(abi.encodePacked("WITHDRAW_FUNDS"))) {
             _withdrawFromProtocols(_token, _amount);
-            _withdrawFundsToSourceChain(_amount, sourceChain, _token, reciever);
+            emit WithdrawalRequested(_token, _amount, reciever, sourceChain);
         } else {
             revert InvalidAction(_action);
         }
@@ -289,23 +293,21 @@ contract YieldExecutor is CCIPReceiver, OwnerIsCreator {
         return messageId;
     }
 
-    function withdrawFundsToSourceChain(
-        uint64 _desinationChainselector,
-        uint256 _amount,
-        address _token,
-        address reciever
-    ) external onlyAllowlistedChain(_desinationChainselector) returns (bytes32) {
-        if (!supportedProtocols[protocol]) revert ProtocolNotSupported(protocol);
+    function withdrawFundsToSourceChain(uint64 _destinationChain, uint256 _amount, address _token, address reciever)
+        external
+        onlyAllowlistedChain(_destinationChain)
+        returns (bytes32)
+    {
         if (_amount == 0) revert InvalidAmount(_amount);
+        if (!supportedProtocols[protocol]) revert ProtocolNotSupported(protocol);
 
-        if (IERC20(_token).balanceOf(address(this)) < _amount) {
-            _withdrawFromProtocols(_token, _amount);
-        }
+        // Withdraw from the protocol
+        _withdrawFromProtocols(_token, _amount);
 
         // Send the funds back to the source chain
-        bytes32 messageId = _withdrawFundsToSourceChain(_amount, _desinationChainselector, _token, reciever);
+        bytes32 messageId = _withdrawFundsToSourceChain(_amount, _destinationChain, _token, reciever);
 
-        emit FundsWithdrawn(protocol, _token, _amount, 0); // Yield is not calculated here
+        emit FundsWithdrawn(protocol, _token, _amount, _amount);
         return messageId;
     }
 
@@ -347,6 +349,61 @@ contract YieldExecutor is CCIPReceiver, OwnerIsCreator {
         uint256 balance = address(this).balance;
         (bool success,) = _to.call{value: balance}("");
         require(success, "ETH transfer failed");
+    }
+
+    /// @notice Check if log-triggered upkeep is needed for withdrawal automation
+    /// @param log The log data from the WithdrawalRequested event
+    /// @param checkData Additional check data (not used in this implementation)
+    /// @return upkeepNeeded Whether upkeep should be performed
+    /// @return performData Encoded data to pass to performUpkeep
+    function checkLog(Log calldata log, bytes memory checkData)
+        external
+        pure
+        returns (bool upkeepNeeded, bytes memory performData)
+    {
+        // Verify this is a WithdrawalRequested event
+        // event WithdrawalRequested(address indexed token, uint256 indexed amount, address indexed receiver, uint64 sourceChain);
+        // Event signature: keccak256("WithdrawalRequested(address,uint256,address,uint64)")
+        bytes32 expectedEventSignature = 0x90890809c654f11d6e72a28fa60149770a0d11ec6c92319d6ceb2bb0a4ea1a15;
+
+        // Check if this is the correct event (topics[0] contains the event signature)
+        if (log.topics[0] != expectedEventSignature) {
+            return (false, "");
+        }
+
+        // Decode the event data - all parameters are now indexed
+        // topics[1] = indexed token (address)
+        // topics[2] = indexed amount (uint256)
+        // topics[3] = indexed receiver (address)
+        // Note: sourceChain would be in topics[4] but events can only have up to 3 indexed parameters
+        // So sourceChain will be in the data field
+
+        address token = address(uint160(uint256(log.topics[1])));
+        uint256 amount = uint256(log.topics[2]);
+        address receiver = address(uint160(uint256(log.topics[3])));
+        uint64 sourceChain = abi.decode(log.data, (uint64));
+
+        // Always trigger upkeep for withdrawal requests
+        upkeepNeeded = true;
+        performData = abi.encode(amount, sourceChain, token, receiver);
+
+        // Silence unused parameter warning
+        checkData;
+    }
+
+    /// @notice Perform the withdrawal automation upkeep
+    /// @param performData Encoded withdrawal parameters
+    function performUpkeep(bytes calldata performData) external {
+        (uint256 amount, uint64 sourceChain, address token, address receiver) =
+            abi.decode(performData, (uint256, uint64, address, address));
+
+        // Verify the source chain is allowed before processing
+        if (!allowlistedSourceChains[sourceChain]) {
+            revert SourceChainNotAllowed(sourceChain);
+        }
+
+        // Execute the withdrawal to source chain
+        _withdrawFundsToSourceChain(amount, sourceChain, token, receiver);
     }
 
     /// @notice Receive ETH (for gas refunds, etc.)

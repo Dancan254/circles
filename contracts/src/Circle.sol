@@ -7,6 +7,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {VRFConsumerBaseV2Plus} from "src/libraries/VRFConsumerBaseV2Plus.sol";
 import {VRFV2PlusClient} from "src/libraries/VRFV2PlusClient.sol";
+import {IYieldDispatcher} from "src/interfaces/IYieldDispatcher.sol";
 
 contract Circle is AccessControl, VRFConsumerBaseV2Plus {
     struct RequestStatus {
@@ -15,11 +16,10 @@ contract Circle is AccessControl, VRFConsumerBaseV2Plus {
         uint256[] randomWords;
     }
 
-    mapping(uint256 => RequestStatus) public s_requests;
-
     using SafeERC20 for IERC20;
 
     error InvalidAmount(uint256 amount);
+    error InvalidWithdrawAmount(uint256 amount, uint256 withdrawable);
     error PayoutPeriodNotReached(uint256 lastPayoutDate, uint256 payoutPeriod);
 
     IERC20 circleToken; // we plan to use usdc for that
@@ -27,12 +27,14 @@ contract Circle is AccessControl, VRFConsumerBaseV2Plus {
     mapping(address => uint256) public contributions;
     mapping(address => uint256) public withdrawableAmount;
     mapping(address => uint256) public approvalCount;
+    mapping(uint256 => RequestStatus) public s_requests;
 
-    address[] public members;
+    address[] internal members;
     address[] public pendingMembers;
     address[] remainingRecipientsInRound;
+    address public s_yieldDispatcher;
     uint256 lastPayoutDate;
-    uint256 contributionAmount;
+    uint256 public contributionAmount;
 
     uint256 public s_subscriptionId;
     uint256[] public requestIds;
@@ -48,10 +50,15 @@ contract Circle is AccessControl, VRFConsumerBaseV2Plus {
 
     event RequestSent(uint256 requestId, uint32 numWords);
     event RequestFulfilled(uint256 requestId, uint256[] randomWords);
+    event SelectedRecipient(address recipient, uint256 amount);
 
-    constructor(IERC20 _circleToken, uint256 _contributionAmount, uint256 subscriptionId)
-        VRFConsumerBaseV2Plus(0x5C210eF41CD1a72de73bF76eC39637bB0d3d7BEE)
-    {
+    constructor(
+        IERC20 _circleToken,
+        uint256 _contributionAmount,
+        uint256 subscriptionId,
+        address _vrfCoordinator,
+        address _yieldDispatcher
+    ) VRFConsumerBaseV2Plus(_vrfCoordinator) {
         circleToken = _circleToken;
         contributionAmount = _contributionAmount;
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -59,6 +66,7 @@ contract Circle is AccessControl, VRFConsumerBaseV2Plus {
         members.push(msg.sender);
 
         s_subscriptionId = subscriptionId;
+        s_yieldDispatcher = _yieldDispatcher;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -90,20 +98,28 @@ contract Circle is AccessControl, VRFConsumerBaseV2Plus {
         // Remove the selected recipient from the remaining recipients
         remainingRecipientsInRound[randomIndex] = remainingRecipientsInRound[remainingRecipientsInRound.length - 1];
         remainingRecipientsInRound.pop();
+        emit SelectedRecipient(selectedRecipient, contributionAmount);
     }
 
     function withdraw(uint256 _amount) external {
         uint256 withdrawable = withdrawableAmount[msg.sender];
-        if (_amount > withdrawable) revert InvalidAmount(_amount);
+        if (_amount > withdrawable) revert InvalidWithdrawAmount(_amount, withdrawable);
+        if (circleToken.balanceOf(address(this)) < _amount) {
+            _requestWithdrawal(0, _amount, msg.sender);
+        }
+
         withdrawableAmount[msg.sender] -= _amount;
+        contributions[msg.sender] -= _amount;
         circleToken.safeTransfer(msg.sender, _amount);
     }
 
     function joinCircle() external {
+        require(!hasRole(CIRCLER, msg.sender), "Already a member of the circle");
         // we want a member to be able to join if they have reached an approval threshold from current members of 1/n of current members
         if (approvalCount[msg.sender] >= members.length / 4) {
             _grantRole(CIRCLER, msg.sender);
             approvalCount[msg.sender] = 0;
+            members.push(msg.sender);
             for (uint256 i; i < pendingMembers.length; i++) {
                 if (pendingMembers[i] == msg.sender) {
                     pendingMembers[i] = pendingMembers[pendingMembers.length - 1];
@@ -111,10 +127,18 @@ contract Circle is AccessControl, VRFConsumerBaseV2Plus {
                     break;
                 }
             }
+        } else {
+            revert("Not enough approvals to join the circle");
         }
     }
 
     function approveMember(address _member) external onlyRole(CIRCLER) {
+        for (uint256 i = 0; i < pendingMembers.length; i++) {
+            if (pendingMembers[i] == _member) {
+                approvalCount[_member]++;
+                return;
+            }
+        }
         pendingMembers.push(_member);
         approvalCount[_member]++;
     }
@@ -133,12 +157,43 @@ contract Circle is AccessControl, VRFConsumerBaseV2Plus {
         }
     }
 
+    /**
+     * @notice Deploys idle yield to the yield dispatcher.
+     * @param _amount The amount of tokens to deploy.
+     * @param _destinationChain The chain selector (0 for same chain).
+     * @param _protocol The protocol address for same-chain deployment.
+     * @dev This function transfers the specified amount of tokens to the yield dispatcher
+     */
+    function deployIdleYield(uint256 _amount, uint64 _destinationChain, address _protocol) external onlyRole(CIRCLER) {
+        require(s_yieldDispatcher != address(0), "Yield dispatcher not set");
+        require(_amount > 0, "Amount must be greater than zero");
+        require(circleToken.balanceOf(address(this)) >= _amount, "Insufficient balance");
+
+        // Call the yield dispatcher to deploy the idle yield
+        IYieldDispatcher(s_yieldDispatcher).deployFunds(_amount, _destinationChain, _protocol);
+    }
+
+    function requestWithdrawal(uint64 _destinationChain, uint256 _amount, address _recipient)
+        external
+        onlyRole(CIRCLER)
+    {
+        _requestWithdrawal(_destinationChain, _amount, _recipient);
+    }
+
+    function _requestWithdrawal(uint64 _destinationChain, uint256 _amount, address _recipient) internal {
+        require(s_yieldDispatcher != address(0), "Yield dispatcher not set");
+        require(_amount > 0, "Amount must be greater than zero");
+
+        // Call the yield dispatcher to request withdrawal
+        IYieldDispatcher(s_yieldDispatcher).requestWithdrawal(_destinationChain, _amount, _recipient);
+    }
+
     // @param enableNativePayment: Set to `true` to enable payment in native tokens, or
     // `false` to pay in LINK
     function requestRandomWords(bool enableNativePayment) external returns (uint256 requestId) {
-        if (getNextPayoutDate() > block.timestamp) {
-            revert PayoutPeriodNotReached(lastPayoutDate, payoutPeriod);
-        }
+        // if (getNextPayoutDate() > block.timestamp) {
+        //     revert PayoutPeriodNotReached(lastPayoutDate, payoutPeriod);
+        // }
         // Will revert if subscription is not set and funded.
         requestId = s_vrfCoordinator.requestRandomWords(
             VRFV2PlusClient.RandomWordsRequest({
@@ -176,5 +231,13 @@ contract Circle is AccessControl, VRFConsumerBaseV2Plus {
 
     function getNextPayoutDate() public view returns (uint256) {
         return lastPayoutDate + payoutPeriod; // Example: next payout in 30 days
+    }
+
+    function getMembers() external view returns (address[] memory) {
+        return members;
+    }
+
+    function getRemainingRecipientsInRound() external view returns (address[] memory) {
+        return remainingRecipientsInRound;
     }
 }

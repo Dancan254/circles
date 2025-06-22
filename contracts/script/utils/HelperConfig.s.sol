@@ -25,6 +25,11 @@ contract HelperConfig is Script {
         address deployedTokenPoolAddress;
     }
 
+    address public ERC4626VaultSepolia = 0xB96C5d0a79B7901A49DB43782CdD8E35720971Be;
+    address public ERC4626VaultFuji = 0xFfabAdA8EDfdF406a95Beb95ef456ED9287b272D;
+    address public FUJIDispatcher = 0xa3e73B9E6261A950616881a8A084842efB9bdC49;
+    address public SEPOLIAExecutor = 0x35b8C50ae752414C0e1Ff49Ed774763124E4BfF2;
+
     constructor() {
         if (block.chainid == 11155111) {
             activeNetworkConfig = getEthereumSepoliaConfig();

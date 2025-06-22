@@ -56,9 +56,10 @@ contract YieldDispatcher is OwnerIsCreator {
     /// @notice Constructor initializes the contract with router and LINK token
     /// @param _router The address of the CCIP router contract
     /// @param _link The address of the LINK token contract
-    constructor(address _router, address _link) {
+    constructor(address _router, address _link, address _testUsdcToken) {
         s_router = IRouterClient(_router);
         s_linkToken = IERC20(_link);
+        s_testUsdcToken = _testUsdcToken;
     }
 
     /// @dev Modifier to check if destination chain is allowlisted
@@ -113,6 +114,13 @@ contract YieldDispatcher is OwnerIsCreator {
         authorizedCircles[_circle] = _authorized;
     }
 
+    /// @notice Set the test USDC token address
+    /// @param _tokenAddress The address of the test USDC token
+    function setTestUsdcToken(address _tokenAddress) external onlyOwner {
+        require(_tokenAddress != address(0), "Invalid token address");
+        s_testUsdcToken = _tokenAddress;
+    }
+
     /*//////////////////////////////////////////////////////////////
                            DEPLOYMENT FUNCTIONS
     //////////////////////////////////////////////////////////////*/
@@ -160,29 +168,29 @@ contract YieldDispatcher is OwnerIsCreator {
         // Transfer tokens from Circle to this contract
         IERC20(s_testUsdcToken).safeIncreaseAllowance(address(this), _amount);
         IERC20(s_testUsdcToken).safeTransferFrom(msg.sender, address(this), _amount);
-        IERC20BurnMint(s_testUsdcToken).burn(_amount);
 
         // Send cross-chain message with tokens
-        bytes32 messageId =
-            _sendCrossChainMessage(_destinationChain, executor, "DEPLOY_FUNDS", s_testUsdcToken, _amount);
+        bytes memory data = abi.encode("DEPLOY_FUNDS", _amount, s_testUsdcToken, address(0));
+        (bytes32 messageId, uint256 fees) =
+            _sendCrossChainMessage(_destinationChain, executor, data, s_testUsdcToken, _amount);
 
         // Track deployed capital
         deployedCapital[_destinationChain] += _amount;
 
-        emit FundsDeployedCrossChain(messageId, _destinationChain, executor, _amount, 0);
+        emit FundsDeployedCrossChain(messageId, _destinationChain, executor, _amount, fees);
     }
 
     /// @notice Send cross-chain message via CCIP (paying with LINK)
     function _sendCrossChainMessage(
         uint64 _destinationChain,
         address _receiver,
-        string memory _action,
+        bytes memory _data,
         address _token,
         uint256 _amount
-    ) internal returns (bytes32 messageId) {
+    ) internal returns (bytes32 messageId, uint256) {
         // Build CCIP message
         Client.EVM2AnyMessage memory message =
-            _buildCCIPMessage(_receiver, _action, _token, _amount, address(s_linkToken));
+            _buildCCIPMessage(_receiver, _data, _token, _amount, address(s_linkToken));
 
         // Calculate fees
         uint256 fees = s_router.getFee(_destinationChain, message);
@@ -198,13 +206,13 @@ contract YieldDispatcher is OwnerIsCreator {
         // Send the message
         messageId = s_router.ccipSend(_destinationChain, message);
 
-        return messageId;
+        return (messageId, fees);
     }
 
     /// @notice Build CCIP message structure
     function _buildCCIPMessage(
         address _receiver,
-        string memory _action,
+        bytes memory _data,
         address _token,
         uint256 _amount,
         address _feeToken
@@ -215,9 +223,9 @@ contract YieldDispatcher is OwnerIsCreator {
 
         return Client.EVM2AnyMessage({
             receiver: abi.encode(_receiver),
-            data: abi.encode(_action),
+            data: _data,
             tokenAmounts: tokenAmounts,
-            extraArgs: Client._argsToBytes(Client.GenericExtraArgsV2({gasLimit: 500_000, allowOutOfOrderExecution: true})),
+            extraArgs: Client._argsToBytes(Client.GenericExtraArgsV2({gasLimit: 2_500_000, allowOutOfOrderExecution: true})),
             feeToken: _feeToken
         });
     }
@@ -229,37 +237,24 @@ contract YieldDispatcher is OwnerIsCreator {
     /// @notice Request funds withdrawal from cross-chain deployment
     /// @param _destinationChain Chain where funds are deployed
     /// @param _amount Amount to withdraw
-    function requestWithdrawal(uint64 _destinationChain, uint256 _amount) external onlyOwner {
+    function requestWithdrawal(uint64 _destinationChain, uint256 _amount, address _recipient) external onlyOwner {
         if (_amount > deployedCapital[_destinationChain]) revert InvalidAmount(_amount);
 
         address executor = chainExecutors[_destinationChain];
         if (executor == address(0)) revert InvalidExecutorAddress();
 
+        bytes memory data = abi.encode("WITHDRAW_FUNDS", _amount, s_testUsdcToken, _recipient);
         // Send withdrawal request via CCIP
-        _sendCrossChainMessage(
-            _destinationChain,
-            executor,
-            "WITHDRAW_FUNDS",
-            address(0), // No token transfer for withdrawal request
-            _amount
-        );
+        IERC20(s_testUsdcToken).safeIncreaseAllowance(address(this), 1);
+        IERC20(s_testUsdcToken).safeTransferFrom(msg.sender, address(this), 1);
+        _sendCrossChainMessage(_destinationChain, executor, data, s_testUsdcToken, 1);
 
-        deployedCapital[_destinationChain] -= _amount;
-        if (IERC20(s_testUsdcToken).balanceOf(address(this)) < _amount) {
-            IERC20BurnMint(s_testUsdcToken).mint(address(this), _amount);
-        }
+        // deployedCapital[_destinationChain] -= _amount;
     }
 
     /*//////////////////////////////////////////////////////////////
                            VIEW FUNCTIONS
     //////////////////////////////////////////////////////////////*/
-
-    /// @notice Get total deployed capital across all chains
-    function getTotalDeployedCapital() external pure returns (uint256 total) {
-        // Note: This would need to iterate through all chains
-        // For now, returning 0 as placeholder
-        return 0;
-    }
 
     /// @notice Get deployed capital on specific chain
     function getDeployedCapitalOnChain(uint64 _chainSelector) external view returns (uint256) {

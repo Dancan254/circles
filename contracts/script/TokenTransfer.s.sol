@@ -23,7 +23,16 @@ contract TransferTokens is Script {
         string memory feeType = "native";
 
         // Get the destination chain ID based on the current chain ID
-        uint256 destinationChainId = 43113;
+        uint256 destinationChainId;
+        if (block.chainid == 11155111) {
+            // If we're on Sepolia, send to Fuji
+            destinationChainId = 43113;
+        } else if (block.chainid == 43113) {
+            // If we're on Fuji, send to Sepolia
+            destinationChainId = 11155111;
+        } else {
+            revert("Unsupported source chain for token transfer");
+        }
 
         // Fetch the network configuration for the current chain
         (, address router,,,, address link,,) = helperConfig.activeNetworkConfig();

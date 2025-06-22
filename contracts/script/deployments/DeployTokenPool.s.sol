@@ -2,8 +2,8 @@
 pragma solidity 0.8.24;
 
 import {Script, console} from "forge-std/Script.sol";
-import {HelperUtils} from "./utils/HelperUtils.s.sol";
-import {HelperConfig} from "./utils/HelperConfig.s.sol";
+import {HelperUtils} from "script/utils/HelperUtils.s.sol";
+import {HelperConfig} from "script/utils/HelperConfig.s.sol";
 import {TestUsdcTokenPool} from "src/BurnMintUsdcPool.sol";
 import {BurnMintUsdc} from "src/TestUsdc.sol";
 import {IBurnMintERC20} from "@chainlink/contracts/src/v0.8/shared/token/ERC20/IBurnMintERC20.sol";

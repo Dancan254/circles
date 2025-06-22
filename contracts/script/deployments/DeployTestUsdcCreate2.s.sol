@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
-import {BurnMintUsdc} from "../src/TestUsdc.sol";
+import {BurnMintUsdc} from "src/TestUsdc.sol";
 
 contract DeployTestUsdcCreate2 is Script {
     // Fixed salt for deterministic addresses across chains

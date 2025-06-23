@@ -123,6 +123,9 @@ transfer-tokens-sepolia :; forge script script/TokenTransfer.s.sol --account dev
 # Transfer tokens from Fuji to Sepolia
 transfer-tokens-fuji :; forge script script/TokenTransfer.s.sol --account dev --rpc-url $(AVALANCHE_FUJI_RPC_URL) --broadcast
 
+# Deploy Circle contract to Avalanche Fuji
+deploy-circle-fuji :; forge script script/deployments/DeployCircle.s.sol --account dev --rpc-url $(AVALANCHE_FUJI_RPC_URL) --broadcast
+
 # Full deployment: token + pool + configuration for Sepolia
 full-deploy-sepolia: deploy-sepolia deploy-pool-sepolia configure-pool-sepolia
 	@echo "✅ Full deployment completed on Sepolia"

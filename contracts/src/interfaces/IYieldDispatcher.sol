@@ -1,11 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-/// @title IYieldDispatcher - Interface for YieldDispatcher contract
-/// @notice Interface for managing fund deployment across same-chain and cross-chain yield strategies
+/**
+ * @title IYieldDispatcher
+ * @author Circle Protocol Team
+ * @notice Interface for managing fund deployment across same-chain and cross-chain yield strategies
+ * @dev Defines the contract interface for deploying Circle contribution funds to yield-generating
+ *      protocols either locally or on other blockchains via Chainlink CCIP.
+ */
 interface IYieldDispatcher {
     /*//////////////////////////////////////////////////////////////
-                                 ERRORS
+                                ERRORS
     //////////////////////////////////////////////////////////////*/
 
     error NotEnoughBalance(uint256 currentBalance, uint256 calculatedFees);
@@ -16,7 +21,7 @@ interface IYieldDispatcher {
     error SameChainDeploymentFailed();
 
     /*//////////////////////////////////////////////////////////////
-                                 EVENTS
+                                EVENTS
     //////////////////////////////////////////////////////////////*/
 
     event FundsDeployedLocally(address indexed protocol, uint256 amount, uint256 timestamp);

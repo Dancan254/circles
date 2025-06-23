@@ -3,8 +3,13 @@ pragma solidity ^0.8.20;
 
 import {ILogAutomation, Log} from "lib/chainlink-evm/contracts/src/v0.8/automation/interfaces/ILogAutomation.sol";
 
-/// @title IYieldExecutor - Interface for YieldExecutor contract
-/// @notice Interface for the YieldExecutor contract that executes yield strategies on destination chains
+/**
+ * @title IYieldExecutor
+ * @author Circle Protocol Team
+ * @notice Interface for the YieldExecutor contract that executes yield strategies on destination chains
+ * @dev Defines the contract interface for receiving cross-chain messages and deploying funds
+ *      to yield-generating protocols on destination chains via Chainlink CCIP.
+ */
 interface IYieldExecutor is ILogAutomation {
     /*//////////////////////////////////////////////////////////////
                                 ERRORS

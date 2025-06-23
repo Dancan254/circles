@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.20;
 
 import {Test, console} from "forge-std/Test.sol";
@@ -9,14 +8,17 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {VRFCoordinatorV2PlusMock} from "test/mocks/VRFCoordinatorV2PlusMock.sol";
 import {IYieldDispatcher} from "src/interfaces/IYieldDispatcher.sol";
 
-// We need to do fork tests for this due to the VRF aspect
+/**
+ * @title CircleTest
+ * @notice Unit tests for the Circle contract functionality
+ * @dev Tests contribution, member management, payout system, and VRF integration
+ */
 contract CircleTest is Test {
     Circle circle;
     BurnMintUsdc usdc;
     uint256 subscriptionId;
     bytes32 SALT = keccak256("CircleTest");
     VRFCoordinatorV2PlusMock vrfCoordinator;
-    // This is not yet declayed
     IYieldDispatcher yieldDispatcher;
 
     uint96 public MOCK_BASE_FEE = 0.001 ether;
@@ -32,15 +34,11 @@ contract CircleTest is Test {
         subscriptionId = vrfCoordinator.createSubscription();
         vrfCoordinator.fundSubscription(subscriptionId, 10 ether);
 
-        // string memory FUJI_RPC_URL = vm.envString("AVALANCHE_FUJI_RPC_URL");
-        // subscriptionId = vm.envUint("SUBSCRIPTION_ID");
-
-        // vm.createSelectFork(FUJI_RPC_URL);
-
         usdc = new BurnMintUsdc();
 
-        bytes memory constructorArgs =
-            abi.encode(IERC20(usdc), uint256(10e18), uint256(subscriptionId), address(vrfCoordinator));
+        bytes memory constructorArgs = abi.encode(
+            IERC20(usdc), uint256(10e18), uint256(subscriptionId), address(vrfCoordinator), address(yieldDispatcher)
+        );
         bytes32 initCodeHash = keccak256(abi.encodePacked(type(Circle).creationCode, constructorArgs));
         address expectedCircleAddress = vm.computeCreate2Address(SALT, initCodeHash, bob);
         vrfCoordinator.addConsumer(subscriptionId, expectedCircleAddress);

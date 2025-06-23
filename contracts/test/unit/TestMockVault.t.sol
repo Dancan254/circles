@@ -26,9 +26,20 @@ contract TestMockVault is Test {
     }
 
     function testAccrueYield() external {
+        vm.startPrank(alice);
+        // First deposit some assets
+        uint256 assetsToDeposit = 100e18;
+        asset.approve(address(vault), assetsToDeposit);
+        vault.deposit(assetsToDeposit, alice);
+
         uint256 initialBalance = vault.totalAssets();
+
+        // Advance time to allow yield accrual
+        vm.warp(block.timestamp + 1 days);
         vault.accrueYield();
+
         uint256 newBalance = vault.totalAssets();
+        vm.stopPrank();
 
         assertGt(newBalance, initialBalance, "Yield should be accrued");
     }

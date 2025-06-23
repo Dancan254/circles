@@ -29,6 +29,8 @@ contract HelperConfig is Script {
     address public ERC4626VaultFuji = 0xFfabAdA8EDfdF406a95Beb95ef456ED9287b272D;
     address public FUJIDispatcher = 0xa3e73B9E6261A950616881a8A084842efB9bdC49;
     address public SEPOLIAExecutor = 0x35b8C50ae752414C0e1Ff49Ed774763124E4BfF2;
+    address public VRFCoordinatorFuji = 0x5C210eF41CD1a72de73bF76eC39637bB0d3d7BEE;
+    address public FujiCircleAddress = 0x57a867C0410c98C1BF637D933B46367E489088DF;
 
     constructor() {
         if (block.chainid == 11155111) {

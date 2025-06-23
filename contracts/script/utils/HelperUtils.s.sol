@@ -5,9 +5,21 @@ import {stdJson} from "forge-std/StdJson.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {HelperConfig} from "./HelperConfig.s.sol";
 
+/**
+ * @title HelperUtils
+ * @author Circle Protocol Team
+ * @notice Utility library for deployment scripts and chain-specific operations
+ * @dev Provides helper functions for chain identification, network configuration
+ *      retrieval, and string formatting utilities used across deployment scripts.
+ */
 library HelperUtils {
     using stdJson for string;
 
+    /**
+     * @notice Gets the human-readable chain name for a given chain ID
+     * @param chainId The chain ID to get the name for
+     * @return The chain name string
+     */
     function getChainName(uint256 chainId) internal pure returns (string memory) {
         if (chainId == 43113) {
             return "avalancheFuji";
@@ -22,6 +34,12 @@ library HelperUtils {
         }
     }
 
+    /**
+     * @notice Gets the network configuration for a specific chain
+     * @param helperConfig The HelperConfig instance to query
+     * @param chainId The chain ID to get configuration for
+     * @return The network configuration struct
+     */
     function getNetworkConfig(HelperConfig helperConfig, uint256 chainId)
         internal
         pure
@@ -40,9 +58,14 @@ library HelperUtils {
         }
     }
 
+    /**
+     * @notice Converts a bytes32 value to its hexadecimal string representation
+     * @param _bytes The bytes32 value to convert
+     * @return The hexadecimal string representation without 0x prefix
+     */
     function bytes32ToHexString(bytes32 _bytes) internal pure returns (string memory) {
         bytes memory hexChars = "0123456789abcdef";
-        bytes memory result = new bytes(64); // 32 bytes = 64 hex characters
+        bytes memory result = new bytes(64);
 
         for (uint256 i = 0; i < 32; i++) {
             result[i * 2] = hexChars[uint8(_bytes[i] >> 4)];

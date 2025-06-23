@@ -6,28 +6,33 @@ import {YieldDispatcher} from "../src/YieldDispatcher.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {HelperConfig} from "./utils/HelperConfig.s.sol";
 
-/// @title DepositYieldFunds - Simple script to deposit funds from Fuji YieldDispatcher to Sepolia YieldExecutor
-/// @notice This script calls the YieldDispatcher on Fuji to send funds to YieldExecutor on Sepolia
+/**
+ * @title DepositYieldFunds
+ * @author Circle Protocol Team
+ * @notice Script to deposit funds from Fuji YieldDispatcher to Sepolia YieldExecutor
+ * @dev This script facilitates cross-chain yield farming by sending USDC from Avalanche Fuji
+ *      to Ethereum Sepolia where it will be automatically staked in yield protocols
+ */
 contract DepositYieldFunds is Script {
-    // Chain selectors
     uint64 public constant SEPOLIA_CHAIN_SELECTOR = 16015286601757825753;
-
-    // Default amount to deposit (10 USDC)
     uint256 public constant DEFAULT_AMOUNT = 1e18;
 
+    /**
+     * @notice Main execution function - deposits default amount to Sepolia
+     * @dev Only works on Avalanche Fuji (chain ID 43113)
+     */
     function run() external {
-        // Only works on Fuji
         require(block.chainid == 43113, "This script must be run on Avalanche Fuji (43113)");
-
         depositFunds(DEFAULT_AMOUNT);
     }
 
-    /// @notice Deposit a specific amount of funds to Sepolia
-    /// @param _amount Amount of USDC to deposit (in wei, 6 decimals)
+    /**
+     * @notice Deposits a specific amount of funds to Sepolia via cross-chain transfer
+     * @param _amount Amount of USDC to deposit (in wei, 18 decimals for test USDC)
+     */
     function depositFunds(uint256 _amount) public {
         console.log("=== DEPOSITING FUNDS FROM FUJI TO SEPOLIA ===");
 
-        // Get deployed contract addresses
         HelperConfig helperConfig = new HelperConfig();
         address dispatcherAddress = helperConfig.FUJIDispatcher();
         address tokenAddress = helperConfig.getTokenAddress();
@@ -40,7 +45,6 @@ contract DepositYieldFunds is Script {
         YieldDispatcher dispatcher = YieldDispatcher(payable(dispatcherAddress));
         IERC20 usdc = IERC20(tokenAddress);
 
-        // Check balances before
         uint256 callerBalance = usdc.balanceOf(msg.sender);
         uint256 dispatcherBalance = usdc.balanceOf(dispatcherAddress);
 
@@ -51,21 +55,17 @@ contract DepositYieldFunds is Script {
 
         vm.startBroadcast();
 
-        // Step 1: Authorize this script to call depositFunds
         console.log("Step 1: Authorizing caller as Circle...");
         dispatcher.authorizeCircle(helperConfig.getTokenAdminAddress(), true);
 
-        // Step 2: Approve YieldDispatcher to spend our USDC
         console.log("Step 2: Approving YieldDispatcher to spend USDC...");
         usdc.approve(dispatcherAddress, _amount);
 
-        // Step 3: Deposit funds cross-chain to Sepolia
         console.log("Step 3: Depositing funds to Sepolia...");
         dispatcher.deployFunds(_amount, SEPOLIA_CHAIN_SELECTOR, address(0));
 
         vm.stopBroadcast();
 
-        // Check balances after
         uint256 callerBalanceAfter = usdc.balanceOf(msg.sender);
         uint256 dispatcherBalanceAfter = usdc.balanceOf(dispatcherAddress);
 
@@ -79,14 +79,18 @@ contract DepositYieldFunds is Script {
         console.log("The YieldExecutor will automatically stake the funds in the configured ERC4626 vault.");
     }
 
-    /// @notice Deposit funds with custom amount (in USDC, e.g., 5 for 5 USDC)
-    /// @param _usdcAmount Amount in USDC (will be converted to wei)
+    /**
+     * @notice Deposits funds with custom amount in USDC units
+     * @param _usdcAmount Amount in USDC (e.g., 5 for 5 USDC, will be converted to wei)
+     */
     function depositFundsWithAmount(uint256 _usdcAmount) external {
         require(_usdcAmount > 0, "Amount must be greater than 0");
-        depositFunds(_usdcAmount * 1e6); // Convert to 6 decimal places
+        depositFunds(_usdcAmount * 1e18);
     }
 
-    /// @notice Check if the caller is authorized to deposit funds
+    /**
+     * @notice Checks if the caller is authorized to deposit funds
+     */
     function checkAuthorization() external {
         HelperConfig helperConfig = new HelperConfig();
         address dispatcherAddress = helperConfig.FUJIDispatcher();
@@ -98,7 +102,9 @@ contract DepositYieldFunds is Script {
         console.log("Is authorized:", isAuthorized);
     }
 
-    /// @notice Check USDC balance of the caller
+    /**
+     * @notice Checks the USDC balance of the caller
+     */
     function checkBalance() external {
         HelperConfig helperConfig = new HelperConfig();
         address tokenAddress = helperConfig.getTokenAddress();

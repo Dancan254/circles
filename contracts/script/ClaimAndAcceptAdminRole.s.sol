@@ -9,13 +9,26 @@ import {RegistryModuleOwnerCustom} from
 import {BurnMintERC20} from "@chainlink/contracts/src/v0.8/shared/token/ERC20/BurnMintERC20.sol";
 import {TokenAdminRegistry} from "@chainlink/contracts-ccip/contracts/tokenAdminRegistry/TokenAdminRegistry.sol";
 
+/**
+ * @title ClaimAdmin
+ * @author Circle Protocol Team
+ * @notice Script to claim and accept admin role for tokens in the CCIP Token Admin Registry
+ * @dev This script handles the two-step process of claiming admin rights and accepting the role
+ *      for cross-chain token transfers via Chainlink CCIP
+ */
 contract ClaimAdmin is Script {
+    /**
+     * @notice Main execution function - claims and accepts admin role
+     */
     function run() external {
         claimAndAcceptAdminRole();
     }
 
+    /**
+     * @notice Claims and accepts admin role for the token in two steps
+     * @dev First claims admin via CCIP admin, then accepts the pending role
+     */
     function claimAndAcceptAdminRole() public {
-        // Fetch the network configuration
         HelperConfig helperConfig = new HelperConfig();
         HelperConfig.NetworkConfigDeployed memory localNetworkConfig = helperConfig.getConfigsForNetwork(block.chainid);
         address tokenAddress = localNetworkConfig.tokenAddress;
@@ -30,32 +43,26 @@ contract ClaimAdmin is Script {
         claimAdminWithCCIPAdmin(tokenAddress, tokenAdmin, registryModuleOwnerCustom);
 
         vm.stopBroadcast();
+
         /*//////////////////////////////////////////////////////////////
-                           ACCEPT ADMIN ROLE
+                             ACCEPT ADMIN ROLE
         //////////////////////////////////////////////////////////////*/
 
-        // Fetch the network configuration to get the TokenAdminRegistry address
         (,,, address tokenAdminRegistry,,,,) = helperConfig.activeNetworkConfig();
 
-        // Ensure the token address and TokenAdminRegistry address are valid
         require(tokenAddress != address(0), "Invalid token address");
         require(tokenAdminRegistry != address(0), "TokenAdminRegistry is not defined for this network");
 
         vm.startBroadcast();
 
-        // Instantiate the TokenAdminRegistry contract
         TokenAdminRegistry tokenAdminRegistryContract = TokenAdminRegistry(tokenAdminRegistry);
 
-        // Fetch the token configuration for the given token address
         TokenAdminRegistry.TokenConfig memory tokenConfig = tokenAdminRegistryContract.getTokenConfig(tokenAddress);
 
-        // Get the pending administrator for the token
         address pendingAdministrator = tokenConfig.pendingAdministrator;
 
-        // Ensure the signer is the pending administrator
         require(pendingAdministrator == tokenAdmin, "Only the pending administrator can accept the admin role");
 
-        // Accept the admin role for the token
         tokenAdminRegistryContract.acceptAdminRole(tokenAddress);
 
         console.log("Accepted admin role for token:", tokenAddress);
@@ -63,22 +70,23 @@ contract ClaimAdmin is Script {
         vm.stopBroadcast();
     }
 
+    /**
+     * @notice Claims admin role using the token's CCIP admin functionality
+     * @param tokenAddress The address of the token to claim admin for
+     * @param tokenAdmin The expected token admin address
+     * @param registryModuleOwnerCustom The registry module owner custom address
+     */
     function claimAdminWithCCIPAdmin(address tokenAddress, address tokenAdmin, address registryModuleOwnerCustom)
         internal
     {
-        // Instantiate the token contract with CCIP admin functionality
         BurnMintERC20 tokenContract = BurnMintERC20(tokenAddress);
-        // Instantiate the registry contract
         RegistryModuleOwnerCustom registryContract = RegistryModuleOwnerCustom(registryModuleOwnerCustom);
 
-        // Get the current CCIP admin of the token
         address tokenContractCCIPAdmin = tokenContract.getCCIPAdmin();
         console.log("Current token admin:", tokenContractCCIPAdmin);
 
-        // Ensure the CCIP admin matches the expected token admin address
         require(tokenContractCCIPAdmin == tokenAdmin, "CCIP admin of token doesn't match the token admin address.");
 
-        // Register the admin via getCCIPAdmin() function
         console.log("Claiming admin of the token via getCCIPAdmin() for CCIP admin:", tokenAdmin);
         registryContract.registerAdminViaGetCCIPAdmin(tokenAddress);
         console.log("Admin claimed successfully for token:", tokenAddress);

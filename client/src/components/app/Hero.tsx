@@ -31,7 +31,7 @@ function Hero() {
         <Lottie animationData={hero} loop={true} className="w-[400px]" />
       </motion.div>
       <motion.div
-        className="flex items-center justify-center mt-10 gap-4 flex-col md:flex-row w-full px-2"
+        className="flex items-center justify-center mt-10 gap-4 flex-col md:flex-row w-full px-2 mb-10"
         initial="hidden"
         animate="visible"
         variants={{
@@ -68,7 +68,7 @@ function Hero() {
             },
           }}
         >
-          Borrow
+          Join a Circle
         </motion.button>
       </motion.div>
     </div>

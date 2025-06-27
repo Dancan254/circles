@@ -88,3 +88,18 @@ export const CIRCLE_DETAILS: CircleDetails[] = [
     ],
   },
 ];
+
+export const networks = [
+  {
+    name: "Avalanche Fuji",
+    icon: avax,
+  },
+  {
+    name: "Ethereum Sepolia",
+    icon: "https://assets.coingecko.com/coins/images/279/large/ethereum.png?1746003173",
+  },
+  {
+    name: "Polygon Mumbai",
+    icon: "https://developers.moralis.com/wp-content/uploads/web3wiki/116-mumbai/637adca2e1a09547acd85968_Y_44LwHNRnOEvnRExgnO1UujtZwn7zq7BCb4oxxHgpI-300x300.jpeg",
+  },
+];

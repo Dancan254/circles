@@ -20,10 +20,14 @@ function Transactions({ transactions }: { transactions: History[] }) {
       </TableCaption>
       <TableHeader>
         <TableRow>
-          <TableHead className="w-[100px]">Network</TableHead>
-          <TableHead>Amount</TableHead>
-          <TableHead>Address</TableHead>
-          <TableHead className="text-right">Date</TableHead>
+          <TableHead className="w-[100px] text-muted-foreground">
+            Network
+          </TableHead>
+          <TableHead className="text-muted-foreground">Amount</TableHead>
+          <TableHead className="text-muted-foreground">Address</TableHead>
+          <TableHead className="text-muted-foreground text-right">
+            Date
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -38,7 +42,7 @@ function Transactions({ transactions }: { transactions: History[] }) {
             </TableCell>
             <TableCell>
               <div className="flex items-center gap-1">
-                <img src={usdc} alt="usdc" className="w-4 h-4" />
+                <img src={usdc} alt="usdc" className="w-6 h-6" />
                 {transaction.amount}
                 <span className="text-muted-foreground text-sm">USDC</span>
               </div>

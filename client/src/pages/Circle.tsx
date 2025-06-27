@@ -1,15 +1,27 @@
 import { FullEarningsChart } from "@/components/app/FullEarningsChart";
 import Transactions from "@/components/app/Transactions";
 import { getConversionRate, splitBalance } from "@/lib/utils";
-import { CIRCLE_DETAILS } from "@/mock";
-import { ArrowLeft, Copy, DollarSign } from "lucide-react";
+import { CIRCLE_DETAILS, networks } from "@/mock";
+import { ArrowLeft, Copy, DollarSign, ExternalLink, X } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 function Circle() {
   const { address } = useParams();
   const circle = CIRCLE_DETAILS.find((circle) => circle.address === address);
   const { integerPart, decimalPart } = splitBalance(circle?.balance);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedNetwork, setSelectedNetwork] = useState(networks[0]);
+  const [amount, setAmount] = useState(0);
   return (
     <motion.div
       className="my-0 max-w-screen-2xl mx-auto mt-4"
@@ -47,6 +59,7 @@ function Circle() {
             ≈ Approx. {getConversionRate(circle?.balance, "usdc")} USDC
           </p>
         </motion.div>
+
         <motion.div
           className="flex flex-col items-center md:flex-row gap-2 md:gap-4 mx-0 md:mx-2"
           initial={{ opacity: 0, x: 30 }}
@@ -73,6 +86,41 @@ function Circle() {
           </div>
         </motion.div>
       </motion.div>
+      <div className="max-w-7xl mx-auto mt-8">
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
+          className="flex flex-row gap-2 items-center mx-2 md:mx-0"
+        >
+          <button className="text-sm font-bold bg-transparent text-white border border-gray-700 rounded-3xl py-2 px-4 flex items-center gap-1">
+            Refresh Next Recipient
+          </button>
+          <button
+            onClick={() => setIsOpen(true)}
+            className="text-sm font-bold bg-transparent text-primary border border-primary rounded-3xl py-2 px-4 flex items-center gap-1"
+          >
+            Deploy Idle USDC
+          </button>
+        </motion.div>
+        <motion.p
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
+          className="text-muted-foreground text-sm mx-2 md:mx-0 mt-4"
+        >
+          Next Recipient Address:
+          <Link
+            to={`https://etherscan.io/address/${circle?.address}`}
+            target="_blank"
+            className="text-gray-400 underline text-sm w-fit flex items-center gap-1 mt-1 hover:text-primary transition-colors duration-300"
+          >
+            {circle?.address.slice(0, 6)}...
+            {circle?.address.slice(-4)}
+            <ExternalLink className="w-4 h-4 cursor-pointer" />
+          </Link>
+        </motion.p>
+      </div>
       <motion.div
         className="max-w-7xl mx-auto mt-8"
         initial={{ opacity: 0, y: 30 }}
@@ -154,6 +202,88 @@ function Circle() {
           <Transactions transactions={circle?.txnHistory || []} />
         </motion.div>
       </motion.div>
+      {isOpen && (
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="w-full max-w-5xl bg-transparent border border-gray-700 rounded-2xl p-1 md:p-2 mx-2 md:mx-0"
+            >
+              <div className="flex flex-col gap-2 bg-background rounded-2xl p-4">
+                <div className="flex items-center justify-between w-full">
+                  <h1 className="text-muted-foreground text-2xl md:text-3xl mx-2 md:mx-0">
+                    Deploy Idle USDC
+                  </h1>
+                  <X
+                    className="w-6 h-6 cursor-pointer text-muted-foreground"
+                    onClick={() => setIsOpen(false)}
+                  />
+                </div>
+                <p className="text-gray-400 text-sm mx-2 md:mx-0">
+                  Deploy idle USDC cross-chain and earn rewards.
+                </p>
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2">
+                    <Input
+                      placeholder="Amount"
+                      type="number"
+                      value={amount}
+                      onChange={(e) => setAmount(Number(e.target.value))}
+                      className="bg-background border border-gray-700 rounded-2xl p-2 w-full md:w-1/2 mt-4 h-12 placeholder:text-gray-400"
+                    />
+                    <Select>
+                      <SelectTrigger
+                        className="w-full md:w-1/2 rounded-2xl mt-2"
+                        value={selectedNetwork.name}
+                      >
+                        <SelectValue
+                          placeholder="Select Network"
+                          className=""
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {networks.map((network) => (
+                          <SelectItem
+                            key={network.name}
+                            value={network.name}
+                            className="flex items-center  justify-between my-1 cursor-pointer"
+                            onClick={() => {
+                              setSelectedNetwork(network);
+                            }}
+                          >
+                            <div className="flex items-center gap-2">
+                              <img
+                                src={network.icon}
+                                alt={network.name}
+                                className="w-7 h-7 rounded-full"
+                              />
+                              <p className="text-sm">{network.name}</p>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <div className="flex items-center md:justify-end justify-center w-full mt-4">
+                      <button className="text-sm font-bold bg-transparent text-primary border border-primary rounded-3xl py-2 px-4 flex items-center gap-1">
+                        Deploy {amount} USDC to {selectedNetwork.name}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
+      )}
     </motion.div>
   );
 }

@@ -1,23 +1,8 @@
-import network from "@/assets/lottie/avax.png";
 import { BadgeCheck, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-
-const networks = [
-  {
-    name: "Avalanche Fuji",
-    icon: network,
-  },
-  {
-    name: "Ethereum Sepolia",
-    icon: "https://assets.coingecko.com/coins/images/279/large/ethereum.png?1746003173",
-  },
-  {
-    name: "Polygon Mumbai",
-    icon: "https://developers.moralis.com/wp-content/uploads/web3wiki/116-mumbai/637adca2e1a09547acd85968_Y_44LwHNRnOEvnRExgnO1UujtZwn7zq7BCb4oxxHgpI-300x300.jpeg",
-  },
-];
+import { networks } from "@/mock";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);

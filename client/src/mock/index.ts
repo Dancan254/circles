@@ -89,6 +89,35 @@ export const CIRCLE_DETAILS: CircleDetails[] = [
   },
 ];
 
+export interface CrossChainTxn {
+  messageId: string;
+  state: number;
+  transactionHash: string;
+  onrampAddress: string;
+  sender: string;
+  origin: string;
+  receiver: string;
+  blockTimestamp: string; // ISO date string
+  receiptTimestamp: string; // ISO date string
+  sourceNetworkName: string;
+  destNetworkName: string;
+  tokenAmounts: {
+    token: string;
+    amount: string;
+  }[];
+  feeToken: string;
+  feeTokenAmount: string;
+  nonce: number;
+  strict: boolean;
+  data: string;
+  gasLimit: string;
+  sequenceNumber: number;
+  destTransactionHash: string;
+  offrampAddress: string;
+  commitStoreAddress: string;
+  infoRaw: string; // JSON string
+}
+
 export const networks = [
   {
     name: "Avalanche Fuji",

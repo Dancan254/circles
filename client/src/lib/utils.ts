@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import avax from "@/assets/lottie/avax.png";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -23,5 +24,18 @@ export function getConversionRate(
       return Number((amount * 0.99789).toFixed(2));
     case "usdt":
       return Number((amount * 1.00211).toFixed(2));
+  }
+}
+
+export function getChainImage(chain: string): string {
+  switch (chain) {
+    case "avalanche-testnet-fuji":
+      return avax;
+    case "ethereum-testnet-sepolia":
+      return "https://assets.coingecko.com/coins/images/279/large/ethereum.png?1746003173";
+    case "polygon-testnet-mumbai":
+      return "https://developers.moralis.com/wp-content/uploads/web3wiki/116-mumbai/637adca2e1a09547acd85968_Y_44LwHNRnOEvnRExgnO1UujtZwn7zq7BCb4oxxHgpI-300x300.jpeg";
+    default:
+      return "";
   }
 }

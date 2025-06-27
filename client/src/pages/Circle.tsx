@@ -22,6 +22,10 @@ function Circle() {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState(networks[0]);
   const [amount, setAmount] = useState(0);
+
+  //   if (true) {
+  //     return <Loading size="lg" />;
+  //   }
   return (
     <motion.div
       className="my-0 max-w-screen-2xl mx-auto mt-4"

@@ -14,8 +14,10 @@ import toast from "react-hot-toast";
 
 function Transactions({ transactions }: { transactions: History[] }) {
   return (
-    <Table className="mx-2 md:mx-0">
-      <TableCaption>A list of recent pool transactions.</TableCaption>
+    <Table className="mx-2 md:mx-0 mb-8">
+      <TableCaption className="text-gray-500">
+        A list of recent pool transactions.
+      </TableCaption>
       <TableHeader>
         <TableRow>
           <TableHead className="w-[100px]">Network</TableHead>

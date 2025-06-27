@@ -6,7 +6,11 @@
 @font-face {
   font-family: "Orienta";
   src: local("Orienta-Regular"),
-    url("./assets/fonts/Orienta/Orienta-Regular.ttf");
+    url("./assets/fonts/Orienta/Orienta-Regular.ttf") format("truetype");
+}
+
+body {
+  font-family: "Orienta", sans-serif;
 }
 
 @theme inline {

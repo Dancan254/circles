@@ -1,9 +1,9 @@
-import React from "react";
+import Hero from "@/components/app/Hero";
 
 function Landing() {
   return (
-    <div>
-      <h1>Landing</h1>
+    <div className="my-0 max-w-screen-2xl mx-auto">
+      <Hero />
     </div>
   );
 }

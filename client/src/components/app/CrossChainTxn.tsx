@@ -23,7 +23,7 @@ import { useState } from "react";
 import loading from "@/assets/lottie/success.json";
 import Lottie from "lottie-react";
 
-const ADDRESS = "0x4D2BEa56B2A2f894ceaee449E81242235984FC54";
+const ADDRESS = "0xc089c6574ba12ef9db724757fd3886ed49940e1f";
 
 export default function CrossChainTxn() {
   const { data: transactions, isLoading, error } = useCrossChainTxn(ADDRESS);
@@ -201,7 +201,7 @@ export default function CrossChainTxn() {
                 className={`border rounded-2xl p-2 w-[100px] ${
                   transaction.state === 2
                     ? "border-green-500 bg-green-500/20"
-                    : transaction.state === 2
+                    : transaction.state === null
                     ? "border-yellow-500 bg-yellow-500/20"
                     : "bg-primary/20"
                 }`}
@@ -209,7 +209,7 @@ export default function CrossChainTxn() {
                 <div className="flex items-center gap-1 ">
                   {transaction.state === 2 ? (
                     <CheckCircle className="w-4 h-4 text-green-500" />
-                  ) : transaction.state === 1 ? (
+                  ) : transaction.state === null ? (
                     <Loader2 className="w-4 h-4 text-yellow-500 animate-spin" />
                   ) : (
                     <X className="w-4 h-4 text-red-500" />
@@ -217,7 +217,7 @@ export default function CrossChainTxn() {
                   <p className="text-xs">
                     {transaction.state === 2
                       ? "Success"
-                      : transaction.state === 1
+                      : transaction.state === null
                       ? "Pending"
                       : "Failed"}
                   </p>

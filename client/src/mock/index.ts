@@ -1,6 +1,9 @@
 import circle from "@/assets/images/pool.png";
 import avax from "@/assets/lottie/avax.png";
 
+export const ROLE =
+  "0x0eef666beafdac323f3c3096f2bd07e212d61fe2936864cef12d518ed6522f83";
+
 export interface Network {
   name: string;
   chainId: number;

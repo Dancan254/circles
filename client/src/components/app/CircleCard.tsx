@@ -1,9 +1,46 @@
 import type { Circle } from "@/mock";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Loader2, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import {
+  useActiveAccount,
+  useReadContract,
+  useSendTransaction,
+} from "thirdweb/react";
+import { contract } from "@/lib/client";
+import { ROLE } from "@/mock";
+import { prepareContractCall } from "thirdweb";
+import { useState } from "react";
 
 function CircleCard({ circle }: { circle: Circle }) {
   const navigate = useNavigate();
+  const activeAccount = useActiveAccount();
+  const { data, isPending } = useReadContract({
+    contract,
+    method:
+      "function hasRole(bytes32 role, address account) view returns (bool)",
+    params: [ROLE, activeAccount?.address || ""],
+  });
+  const { mutate: sendTransaction } = useSendTransaction();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const onJoinCircle = () => {
+    const transaction = prepareContractCall({
+      contract,
+      method: "function joinCircle()",
+      params: [],
+    });
+    sendTransaction(transaction);
+  };
+
+  function handlePoolClick() {
+    setIsLoading(true);
+    if (data) {
+      navigate(`/circle/${circle.address}`);
+    } else {
+      onJoinCircle();
+      navigate(`/circle/${circle.address}`);
+    }
+  }
   return (
     <div className="rounded-2xl shadow-lg bg-card overflow-hidden md:w-[350px]">
       {/* Image section */}
@@ -65,13 +102,23 @@ function CircleCard({ circle }: { circle: Circle }) {
           </div>
         </div>
         <div className="flex items-center justify-center md:justify-end mt-4">
-          <button
-            className="bg-card flex items-center justify-center gap-2 border border-primary text-primary px-4 py-2 rounded-2xl w-full md:w-1/2 hover:bg-primary hover:text-white transition-all duration-300"
-            onClick={() => navigate(`/circle/${circle.address}`)}
-          >
-            View Pool
-            <ExternalLink className="w-4 h-4" />
-          </button>
+          {isPending || isLoading ? (
+            <div className="flex items-center flex-col justify-center">
+              <Loader2 className="w-4 h-4 animate-spin" />
+            </div>
+          ) : (
+            <button
+              className="bg-card flex items-center justify-center gap-2 border border-primary text-primary px-4 py-2 rounded-2xl w-full md:w-1/2 hover:bg-primary hover:text-white transition-all duration-300"
+              onClick={handlePoolClick}
+            >
+              {data ? "View Pool" : "Join Pool"}
+              {data ? (
+                <ExternalLink className="w-4 h-4" />
+              ) : (
+                <Plus className="w-4 h-4" />
+              )}
+            </button>
+          )}
         </div>
       </div>
     </div>

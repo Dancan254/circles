@@ -3,6 +3,10 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { networks } from "@/mock";
+import { ConnectButton } from "thirdweb/react";
+import { client } from "@/lib/client";
+import { sepolia, avalancheFuji } from "thirdweb/chains";
+import logo from "../../assets/images/circles-dark.png";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,12 +37,28 @@ function Navbar() {
           />
           <ChevronDown className="w-4 h-4" />
         </div>
-        <button
-          className="px-2 py-2 bg-primary rounded-full text-muted font-bold cursor-pointer hover:bg-primary/80 hover:text-gray-300 transition-all duration-300"
-          onClick={() => navigate("/dashboard")}
-        >
-          Connect Wallet
-        </button>
+        <ConnectButton
+          client={client}
+          theme="dark"
+          autoConnect
+          connectButton={{
+            label: "Launch App",
+            style: {
+              backgroundColor: "var(--primary)",
+              borderRadius: "30px",
+            },
+          }}
+          chains={[avalancheFuji, sepolia]}
+          connectModal={{
+            title: "Sign in to Circles",
+            titleIcon: logo,
+            size: "compact",
+          }}
+          onConnect={(account) => {
+            navigate("/dashboard");
+            console.log(account);
+          }}
+        />
       </div>
       {isOpen && (
         <AnimatePresence>

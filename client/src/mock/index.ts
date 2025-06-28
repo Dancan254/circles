@@ -132,3 +132,30 @@ export const networks = [
     icon: "https://developers.moralis.com/wp-content/uploads/web3wiki/116-mumbai/637adca2e1a09547acd85968_Y_44LwHNRnOEvnRExgnO1UujtZwn7zq7BCb4oxxHgpI-300x300.jpeg",
   },
 ];
+
+export const loadingStates = [
+  {
+    text: "Preparing Transaction on Origin Chain",
+  },
+  {
+    text: "Submitting to Source Chain",
+  },
+  {
+    text: "Onramp: Locking/Transferring Tokens",
+  },
+  {
+    text: "Message Sent via CCIP Network",
+  },
+  {
+    text: "Relaying to Destination Chain",
+  },
+  {
+    text: "Offramp: Receiving Tokens",
+  },
+  {
+    text: "Transaction Finalized on Destination Chain",
+  },
+  {
+    text: "Cross-Chain Transfer Complete",
+  },
+];

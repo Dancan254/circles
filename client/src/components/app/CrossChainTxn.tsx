@@ -12,18 +12,23 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { MultiStepLoader as Loader } from "@/components/ui/multi-step-loader";
 import { useCrossChainTxn } from "@/hooks/useCrossChainTxn";
-import type { CrossChainTxn } from "@/mock";
+import { loadingStates, type CrossChainTxn } from "@/mock";
 import Loading from "./Loading";
 import { CheckCircle, ExternalLink, Loader2, X } from "lucide-react";
 import { getChainImage, getChainName } from "@/lib/utils";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import loading from "@/assets/lottie/success.json";
+import Lottie from "lottie-react";
 
 const ADDRESS = "0x0bd7dd9a885d9526ff82813829ef5c7d8afdb8c4";
 
 export default function CrossChainTxn() {
   const { data: transactions, isLoading, error } = useCrossChainTxn(ADDRESS);
-  console.log(transactions);
+  const [showTxnStatus, setShowTxnStatus] = useState(false);
+  const [showSuccessTxn, setShowSuccessTxn] = useState(false);
 
   if (isLoading) {
     return <Loading size="xs" />;
@@ -45,6 +50,52 @@ export default function CrossChainTxn() {
     );
   }
 
+  if (showTxnStatus) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader
+          loadingStates={loadingStates}
+          loading={showTxnStatus}
+          duration={2000}
+          closeCallback={closeSuccessTxn}
+        />
+      </div>
+    );
+  }
+
+  if (showSuccessTxn) {
+    return (
+      <div className="flex items-center flex-col h-screen justify-center backdrop-blur-sm bg-black/20 absolute top-0 left-0 w-full z-[100]">
+        <Lottie
+          animationData={loading}
+          loop={true}
+          className="md:h-1/2 md:w-1/2"
+        />
+        <p className="text-muted-foreground text-lg font-bold">
+          Transaction Successful
+        </p>
+        <button
+          className="text-primary underline text-md font-bold mt-4"
+          onClick={() => setShowSuccessTxn(false)}
+        >
+          Close
+        </button>
+      </div>
+    );
+  }
+
+  function onRowClick(transaction: CrossChainTxn) {
+    if (transaction.state === 2) {
+      setShowSuccessTxn(true);
+    } else {
+      setShowTxnStatus(true);
+    }
+  }
+
+  function closeSuccessTxn() {
+    setShowTxnStatus(false);
+  }
+
   return (
     <Table className="mt-4">
       <TableCaption className="text-gray-400">
@@ -52,15 +103,15 @@ export default function CrossChainTxn() {
       </TableCaption>
       <TableHeader>
         <TableRow>
-          <TableHead className="w-[150px] text-muted-foreground text-lg">
+          <TableHead className="w-[150px] text-muted-foreground text-lg hidden md:table-cell">
             Message ID
           </TableHead>
-          <TableHead className="text-muted-foreground text-lg">
+          <TableHead className="text-muted-foreground text-lg hidden md:table-cell">
             Source Txn
           </TableHead>
           <TableHead className="text-muted-foreground text-lg">From</TableHead>
           <TableHead className="text-muted-foreground text-lg">To</TableHead>
-          <TableHead className="text-muted-foreground text-lg">
+          <TableHead className="text-muted-foreground text-lg hidden md:table-cell">
             Rcpt Timestamp
           </TableHead>
           <TableHead className="text-muted-foreground text-lg text-center">
@@ -70,8 +121,12 @@ export default function CrossChainTxn() {
       </TableHeader>
       <TableBody>
         {transactions.slice(0, 5).map((transaction) => (
-          <TableRow key={transaction.messageId} className="h-12">
-            <TableCell className="font-medium flex items-center gap-2 text-primary text-md">
+          <TableRow
+            key={transaction.messageId}
+            className="h-12"
+            onClick={() => onRowClick(transaction)}
+          >
+            <TableCell className="font-medium md:flex items-center gap-2 text-primary text-md hidden">
               {transaction.messageId.slice(0, 6)}...
               {transaction.messageId.slice(-4)}
               <ExternalLink
@@ -84,7 +139,7 @@ export default function CrossChainTxn() {
                 }}
               />
             </TableCell>
-            <TableCell className="text-md text-muted-foreground">
+            <TableCell className="text-md text-muted-foreground hidden md:table-cell">
               <Tooltip>
                 <TooltipTrigger>
                   <Link
@@ -138,7 +193,7 @@ export default function CrossChainTxn() {
                 </TooltipContent>
               </Tooltip>
             </TableCell>
-            <TableCell className="text-md">
+            <TableCell className="text-md hidden md:table-cell">
               {new Date(transaction.receiptTimestamp).toLocaleString()}
             </TableCell>
             <TableCell className="flex justify-center">

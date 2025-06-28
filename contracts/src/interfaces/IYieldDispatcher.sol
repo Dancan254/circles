@@ -13,28 +13,28 @@ interface IYieldDispatcher {
                                 ERRORS
     //////////////////////////////////////////////////////////////*/
 
-    error NotEnoughBalance(uint256 currentBalance, uint256 calculatedFees);
-    error DestinationChainNotAllowed(uint64 destinationChainSelector);
-    error InvalidExecutorAddress();
-    error InvalidAmount(uint256 amount);
-    error ProtocolNotSupported(address protocol);
-    error SameChainDeploymentFailed();
+    // error NotEnoughBalance(uint256 currentBalance, uint256 calculatedFees);
+    // error DestinationChainNotAllowed(uint64 destinationChainSelector);
+    // error InvalidExecutorAddress();
+    // error InvalidAmount(uint256 amount);
+    // error ProtocolNotSupported(address protocol);
+    // error SameChainDeploymentFailed();
 
-    /*//////////////////////////////////////////////////////////////
-                                EVENTS
-    //////////////////////////////////////////////////////////////*/
+    // /*//////////////////////////////////////////////////////////////
+    //                             EVENTS
+    // //////////////////////////////////////////////////////////////*/
 
-    event FundsDeployedLocally(address indexed protocol, uint256 amount, uint256 timestamp);
+    // event FundsDeployedLocally(address indexed protocol, uint256 amount, uint256 timestamp);
 
-    event FundsDeployedCrossChain(
-        bytes32 indexed messageId, uint64 indexed destinationChain, address executor, uint256 amount, uint256 fees
-    );
+    // event FundsDeployedCrossChain(
+    //     bytes32 indexed messageId, uint64 indexed destinationChain, address executor, uint256 amount, uint256 fees
+    // );
 
-    event YieldCollected(address indexed protocol, uint256 amount);
+    // event YieldCollected(address indexed protocol, uint256 amount);
 
-    event ExecutorUpdated(uint64 indexed chainSelector, address oldExecutor, address newExecutor);
+    // event ExecutorUpdated(uint64 indexed chainSelector, address oldExecutor, address newExecutor);
 
-    event ChainAllowlistUpdated(uint64 indexed chainSelector, bool allowed);
+    // event ChainAllowlistUpdated(uint64 indexed chainSelector, bool allowed);
 
     /*//////////////////////////////////////////////////////////////
                            ADMIN FUNCTIONS
@@ -78,15 +78,12 @@ interface IYieldDispatcher {
     /// @param _destinationChain Chain where funds are deployed
     /// @param _amount Amount to withdraw
     /// @param _recipient Address to receive the withdrawn funds
-    function requestWithdrawal(uint64 _destinationChain, uint256 _amount, address _recipient) external;
+    function requestWithdrawal(uint64 _destinationChain, uint256 _amount, address _recipient, address _protocol)
+        external;
 
     /*//////////////////////////////////////////////////////////////
                                VIEW FUNCTIONS
     //////////////////////////////////////////////////////////////*/
-
-    /// @notice Get total deployed capital across all chains
-    /// @return total Total deployed capital
-    function getTotalDeployedCapital() external pure returns (uint256 total);
 
     /// @notice Get deployed capital on specific chain
     /// @param _chainSelector Chain selector to query

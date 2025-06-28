@@ -20,6 +20,7 @@ function CircleCard({ circle }: { circle: Circle }) {
       "function hasRole(bytes32 role, address account) view returns (bool)",
     params: [ROLE, activeAccount?.address || ""],
   });
+  console.log(circle.address, data);
   const { mutate: sendTransaction } = useSendTransaction();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -42,7 +43,10 @@ function CircleCard({ circle }: { circle: Circle }) {
     }
   }
   return (
-    <div className="rounded-2xl shadow-lg bg-card overflow-hidden md:w-[350px]">
+    <div
+      className="rounded-2xl shadow-lg bg-card overflow-hidden md:w-[350px]"
+      key={circle.address}
+    >
       {/* Image section */}
       <div className="relative h-48 w-full">
         <img
@@ -58,8 +62,17 @@ function CircleCard({ circle }: { circle: Circle }) {
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
             <h1 className="text-muted-foreground text-sm">Pool Address</h1>
-            <p className="text-primary text-lg">
+            <p
+              className="text-primary text-lg flex items-center gap-1"
+              onClick={() => {
+                window.open(
+                  `https://snowtrace.io/address/${circle.address}`,
+                  "_blank"
+                );
+              }}
+            >
               {circle.address.slice(0, 6)}...{circle.address.slice(-4)}
+              <ExternalLink className="w-4 h-4" />
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -90,6 +103,7 @@ function CircleCard({ circle }: { circle: Circle }) {
             <div className="flex items-center">
               {circle.investedChain.map((chain) => (
                 <img
+                  key={chain.name}
                   src={chain.icon}
                   alt={chain.name}
                   className="w-5 h-5 rounded-full"

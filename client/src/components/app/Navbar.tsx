@@ -54,9 +54,8 @@ function Navbar() {
             titleIcon: logo,
             size: "compact",
           }}
-          onConnect={(account) => {
+          onConnect={() => {
             navigate("/dashboard");
-            console.log(account);
           }}
         />
       </div>

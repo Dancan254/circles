@@ -1,7 +1,7 @@
 import { FullEarningsChart } from "@/components/app/FullEarningsChart";
 import Transactions from "@/components/app/Transactions";
 import { getConversionRate, splitBalance } from "@/lib/utils";
-import { CIRCLE_DETAILS, networks } from "@/mock";
+import { networks } from "@/mock";
 import { ArrowLeft, Copy, DollarSign, ExternalLink, X } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
@@ -14,18 +14,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import useCircle from "@/hooks/useCircle";
+import Loading from "@/components/app/Loading";
+import { toast } from "react-hot-toast";
 
 function Circle() {
   const { address } = useParams();
-  const circle = CIRCLE_DETAILS.find((circle) => circle.address === address);
+  const { circle, isLoading } = useCircle(address as string);
   const { integerPart, decimalPart } = splitBalance(circle?.balance);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState(networks[0]);
   const [amount, setAmount] = useState(0);
 
-  //   if (true) {
-  //     return <Loading size="lg" />;
-  //   }
+  if (isLoading) {
+    return <Loading size="lg" />;
+  }
   return (
     <motion.div
       className="my-0 max-w-screen-2xl mx-auto mt-4"
@@ -76,7 +79,18 @@ function Circle() {
               {circle?.address.slice(2, 6)}...
               {circle?.address.slice(-4)}
             </p>
-            <Copy className="w-4 h-4" />
+            <Copy
+              className="w-4 h-4 cursor-pointer"
+              onClick={() => {
+                navigator.clipboard.writeText(circle?.address || "");
+                toast.success("Circle Address copied to clipboard", {
+                  style: {
+                    background: "var(--background)",
+                    color: "var(--foreground)",
+                  },
+                });
+              }}
+            />
           </div>
           <div className="flex flex-row gap-1 items-center justify-center rounded-2xl mr-4">
             <img

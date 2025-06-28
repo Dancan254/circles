@@ -1,24 +1,20 @@
 import usdc from "@/assets/lottie/usdc.svg";
 import { DollarSign, Loader2, Plus } from "lucide-react";
 import { BriefEarningsChart } from "@/components/app/BriefEarningsChart";
-import { CIRCLE_ADDRESS, CIRCLES, ROLE } from "@/mock";
+import { CIRCLE_ADDRESS, ROLE } from "@/mock";
 import CircleCard from "@/components/app/CircleCard";
 import { motion } from "framer-motion";
-import { splitBalance } from "@/lib/utils";
+import { convertBalance, splitBalance } from "@/lib/utils";
 import CrossChainTxn from "@/components/app/CrossChainTxn";
 import { useActiveAccount, useReadContract } from "thirdweb/react";
 import { contract } from "@/lib/client";
 import Loading from "@/components/app/Loading";
 import { useCircleBalance } from "@/hooks/useCircleBalance";
-
-const CLAIMABLE_BALANCE = 10.67;
-const CIRCLE_INVESTMENT = 200.89;
+import useUserContributed from "@/hooks/useUserContributed";
+import useAddressClaimableBalance from "@/hooks/useAddressClaimableBalance";
+import useCircles from "@/hooks/useCircles";
 
 function Dashboard() {
-  const {
-    integerPart: claimableIntegerPart,
-    decimalPart: claimableDecimalPart,
-  } = splitBalance(CLAIMABLE_BALANCE);
   const activeAccount = useActiveAccount();
   const { data, isPending } = useReadContract({
     contract,
@@ -28,6 +24,16 @@ function Dashboard() {
   });
   const { data: circleBalance, isLoading: circleBalanceLoading } =
     useCircleBalance(CIRCLE_ADDRESS);
+  const { data: userContributed, isLoading: userContributedLoading } =
+    useUserContributed(activeAccount?.address || "");
+  const { data: claimableBalance, isLoading: claimableBalanceLoading } =
+    useAddressClaimableBalance(activeAccount?.address || "");
+  const {
+    integerPart: claimableIntegerPart,
+    decimalPart: claimableDecimalPart,
+  } = splitBalance(convertBalance(claimableBalance));
+  const { data: circles, isLoading: circlesLoading } = useCircles();
+
   const { integerPart, decimalPart } = splitBalance(circleBalance);
 
   if (isPending) {
@@ -36,7 +42,7 @@ function Dashboard() {
 
   return (
     <motion.div
-      className="my-0 max-w-screen-xl mx-auto px-2"
+      className="my-0 max-w-screen-xl mx-auto px-2 pb-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -82,21 +88,25 @@ function Dashboard() {
               </div>
             )}
             <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <p className="text-sm font-light text-gray-400 ml-2 mr-1">
-                  You've contributed{" "}
-                </p>
-                <DollarSign className="w-4 h-4 text-muted-foreground" />
-                <p className="text-lg font-bold">
-                  {CIRCLE_INVESTMENT.toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}{" "}
-                </p>
-                <p className="text-sm font-light text-gray-400 ml-1">
-                  in this circle.
-                </p>
-              </div>
+              {userContributedLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <div className="flex items-center">
+                  <p className="text-sm font-light text-gray-400 ml-2 mr-1">
+                    You've contributed{" "}
+                  </p>
+                  <DollarSign className="w-4 h-4 text-muted-foreground" />
+                  <p className="text-lg font-bold">
+                    {convertBalance(userContributed).toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}{" "}
+                  </p>
+                  <p className="text-sm font-light text-gray-400 ml-1">
+                    in this circle.
+                  </p>
+                </div>
+              )}
             </div>
           </motion.div>
         ) : (
@@ -145,27 +155,31 @@ function Dashboard() {
               }}
             >
               <h1 className="text-sm font-light mb-1">Claimable Balance</h1>
-              <div className="">
-                <div className="flex items-center">
-                  <DollarSign className="w-5 h-5 text-muted-foreground" />
-                  <p className="font-bold text-2xl text-primary">
-                    {claimableIntegerPart}
-                    <span className="text-md font-bold text-muted-foreground">
-                      .{claimableDecimalPart}
-                    </span>
-                  </p>
+              {claimableBalanceLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <div className="">
+                  <div className="flex items-center">
+                    <DollarSign className="w-5 h-5 text-muted-foreground" />
+                    <p className="font-bold text-2xl text-primary">
+                      {claimableIntegerPart}
+                      <span className="text-md font-bold text-muted-foreground">
+                        .{claimableDecimalPart}
+                      </span>
+                    </p>
+                  </div>
+                  {convertBalance(claimableBalance) > 1 && (
+                    <button className="text-sm font-bold mt-8 w-full bg-primary border-none rounded-2xl py-1 px-4 text-[#262223]">
+                      Claim USDC
+                    </button>
+                  )}
+                  {convertBalance(claimableBalance) < 1 && (
+                    <p className="text-sm text-secondary mt-2 absolute bottom-4">
+                      You currently have no USDC to claim
+                    </p>
+                  )}
                 </div>
-                {CLAIMABLE_BALANCE > 1 && (
-                  <button className="text-sm font-bold mt-8 w-full bg-primary border-none rounded-2xl py-1 px-4 text-[#262223]">
-                    Claim USDC
-                  </button>
-                )}
-                {CLAIMABLE_BALANCE < 1 && (
-                  <p className="text-sm text-secondary mt-2 absolute bottom-4">
-                    You currently have no USDC to claim
-                  </p>
-                )}
-              </div>
+              )}
             </motion.div>
           </motion.div>
         ) : (
@@ -195,36 +209,40 @@ function Dashboard() {
       >
         Trending Circles
       </motion.h1>
-      <motion.div
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4"
-        initial="hidden"
-        animate="visible"
-        variants={{
-          hidden: {},
-          visible: {
-            transition: {
-              staggerChildren: 0.1,
-              delayChildren: 0.7,
-            },
-          },
-        }}
-      >
-        {CIRCLES.map((circle) => (
-          <motion.div
-            key={circle.address}
-            variants={{
-              hidden: { opacity: 0, y: 20 },
-              visible: {
-                opacity: 1,
-                y: 0,
-                transition: { duration: 0.5, ease: "easeOut" },
+      {circlesLoading ? (
+        <Loading size="lg" />
+      ) : (
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: {},
+            visible: {
+              transition: {
+                staggerChildren: 0.1,
+                delayChildren: 0.7,
               },
-            }}
-          >
-            <CircleCard circle={circle} />
-          </motion.div>
-        ))}
-      </motion.div>
+            },
+          }}
+        >
+          {circles.map((circle, index) => (
+            <motion.div
+              key={index}
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: { duration: 0.5, ease: "easeOut" },
+                },
+              }}
+            >
+              <CircleCard circle={circle} />
+            </motion.div>
+          ))}
+        </motion.div>
+      )}
     </motion.div>
   );
 }

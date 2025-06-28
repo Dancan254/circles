@@ -35,8 +35,6 @@ function Transactions() {
     );
   }
 
-  console.log(data);
-
   return (
     <Table className="mx-2 md:mx-0 mb-8">
       <TableCaption className="text-gray-500">

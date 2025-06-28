@@ -14,7 +14,11 @@ import {
 } from "@/components/ui/tooltip";
 import { MultiStepLoader as Loader } from "@/components/ui/multi-step-loader";
 import { useCrossChainTxn } from "@/hooks/useCrossChainTxn";
-import { loadingStates, type CrossChainTxn } from "@/mock";
+import {
+  CIRCLE_DISPATCHER_ADDRESS,
+  loadingStates,
+  type CrossChainTxn,
+} from "@/mock";
 import Loading from "./Loading";
 import { CheckCircle, ExternalLink, Loader2, X } from "lucide-react";
 import { getChainImage, getChainName } from "@/lib/utils";
@@ -23,10 +27,12 @@ import { useState } from "react";
 import loading from "@/assets/lottie/success.json";
 import Lottie from "lottie-react";
 
-const ADDRESS = "0x0bd7dd9a885d9526ff82813829ef5c7d8afdb8c4";
-
 export default function CrossChainTxn() {
-  const { data: transactions, isLoading, error } = useCrossChainTxn(ADDRESS);
+  const {
+    data: transactions,
+    isLoading,
+    error,
+  } = useCrossChainTxn(CIRCLE_DISPATCHER_ADDRESS);
   const [showTxnStatus, setShowTxnStatus] = useState(false);
   const [showSuccessTxn, setShowSuccessTxn] = useState(false);
 
@@ -201,7 +207,7 @@ export default function CrossChainTxn() {
                 className={`border rounded-2xl p-2 w-[100px] ${
                   transaction.state === 2
                     ? "border-green-500 bg-green-500/20"
-                    : transaction.state === 2
+                    : transaction.state === null
                     ? "border-yellow-500 bg-yellow-500/20"
                     : "bg-primary/20"
                 }`}
@@ -209,7 +215,7 @@ export default function CrossChainTxn() {
                 <div className="flex items-center gap-1 ">
                   {transaction.state === 2 ? (
                     <CheckCircle className="w-4 h-4 text-green-500" />
-                  ) : transaction.state === 1 ? (
+                  ) : transaction.state === null ? (
                     <Loader2 className="w-4 h-4 text-yellow-500 animate-spin" />
                   ) : (
                     <X className="w-4 h-4 text-red-500" />
@@ -217,7 +223,7 @@ export default function CrossChainTxn() {
                   <p className="text-xs">
                     {transaction.state === 2
                       ? "Success"
-                      : transaction.state === 1
+                      : transaction.state === null
                       ? "Pending"
                       : "Failed"}
                   </p>

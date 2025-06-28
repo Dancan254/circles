@@ -12,9 +12,7 @@ export function useCrossChainTxn(address: string) {
     queryKey: ["cross-chain-txn", address],
     queryFn: async () => {
       const res = await fetch(`${API_URL}${address}`);
-      console.log(res);
       const data = await res.json();
-      console.log(data);
       return data as CrossChainTxn[];
     },
   });

@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import avax from "@/assets/lottie/avax.png";
+import { TOKEN_DECIMALS } from "@/mock";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -16,13 +17,13 @@ export function splitBalance(balance: number | undefined) {
 
 export function getConversionRate(
   amount: number | undefined,
-  from: "usdc" | "usdt"
+  from: "usdc" | "usd"
 ): number {
   if (!amount) return 0;
   switch (from) {
     case "usdc":
       return Number((amount * 0.99789).toFixed(2));
-    case "usdt":
+    case "usd":
       return Number((amount * 1.00211).toFixed(2));
   }
 }
@@ -51,4 +52,22 @@ export function getChainName(chain: string): string {
     default:
       return "";
   }
+}
+
+export function getEcosystemImage(ecosystem: string): string {
+  switch (ecosystem) {
+    case "avalanche":
+      return avax;
+    case "ethereum":
+      return "https://assets.coingecko.com/coins/images/279/large/ethereum.png?1746003173";
+    case "polygon":
+      return "https://developers.moralis.com/wp-content/uploads/web3wiki/116-mumbai/637adca2e1a09547acd85968_Y_44LwHNRnOEvnRExgnO1UujtZwn7zq7BCb4oxxHgpI-300x300.jpeg";
+    default:
+      return "";
+  }
+}
+
+export function convertBalance(balance: BigInt | undefined) {
+  if (!balance) return 0;
+  return Number(balance) / 10 ** TOKEN_DECIMALS;
 }

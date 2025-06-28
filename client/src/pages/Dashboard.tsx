@@ -146,7 +146,7 @@ function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.5, ease: "easeOut" }}
       >
-        My Cross-Chain Transactions
+        Cross-Chain Transactions
       </motion.h1>
       <motion.div>
         <CrossChainTxn />

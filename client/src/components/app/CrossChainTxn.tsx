@@ -31,8 +31,16 @@ export default function CrossChainTxn() {
 
   if (error || !transactions) {
     return (
-      <div className="flex items-center justify-center h-screen text-primary">
+      <div className="flex items-center justify-center h-[300px] text-primary">
         Error: {error?.message}
+      </div>
+    );
+  }
+
+  if (transactions.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[300px] text-primary">
+        No Cross-Chain transactions found
       </div>
     );
   }
@@ -40,7 +48,7 @@ export default function CrossChainTxn() {
   return (
     <Table className="mt-4">
       <TableCaption className="text-gray-400">
-        A five of your latest cross-chain transactions.
+        Five of your circle's latest cross-chain transactions.
       </TableCaption>
       <TableHeader>
         <TableRow>
@@ -52,6 +60,9 @@ export default function CrossChainTxn() {
           </TableHead>
           <TableHead className="text-muted-foreground text-lg">From</TableHead>
           <TableHead className="text-muted-foreground text-lg">To</TableHead>
+          <TableHead className="text-muted-foreground text-lg">
+            Rcpt Timestamp
+          </TableHead>
           <TableHead className="text-muted-foreground text-lg text-center">
             Status
           </TableHead>
@@ -126,6 +137,9 @@ export default function CrossChainTxn() {
                   <p>{getChainName(transaction.destNetworkName)}</p>
                 </TooltipContent>
               </Tooltip>
+            </TableCell>
+            <TableCell className="text-md">
+              {new Date(transaction.receiptTimestamp).toLocaleString()}
             </TableCell>
             <TableCell className="flex justify-center">
               <div

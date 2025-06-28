@@ -6,6 +6,8 @@ import {Client} from "@chainlink/contracts-ccip/contracts/libraries/Client.sol";
 import {IERC20BurnMint, IERC20} from "src/interfaces/IERC20BurnMint.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {OwnerIsCreator} from "@chainlink/contracts/src/v0.8/shared/access/OwnerIsCreator.sol";
+import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
+import {IYieldDispatcher} from "src/interfaces/IYieldDispatcher.sol";
 
 /**
  * @title YieldDispatcher
@@ -151,7 +153,7 @@ contract YieldDispatcher is OwnerIsCreator {
         IERC20(s_testUsdcToken).safeIncreaseAllowance(_protocol, _amount);
 
         // TODO: Implement actual protocol integration (Aave, Compound, etc.)
-        // Example: IAave(_protocol).supply(s_testUsdcToken, _amount, address(this), 0);
+        IERC4626(_protocol).deposit(_amount, address(this));
 
         emit FundsDeployedLocally(_protocol, _amount, block.timestamp);
     }
@@ -254,8 +256,14 @@ contract YieldDispatcher is OwnerIsCreator {
      * @param _recipient Address to receive withdrawn funds
      * @dev Sends withdrawal request to YieldExecutor on destination chain
      */
-    function requestWithdrawal(uint64 _destinationChain, uint256 _amount, address _recipient) external onlyOwner {
-        if (_amount > deployedCapital[_destinationChain]) revert InvalidAmount(_amount);
+    function requestWithdrawal(uint64 _destinationChain, uint256 _amount, address _recipient, address _protocol)
+        external
+    {
+        // if (_amount > deployedCapital[_destinationChain]) revert InvalidAmount(_amount);
+        if (_destinationChain == 0) {
+            IERC4626(_protocol).withdraw(_amount, _recipient, address(this));
+            return;
+        }
 
         address executor = chainExecutors[_destinationChain];
         if (executor == address(0)) revert InvalidExecutorAddress();

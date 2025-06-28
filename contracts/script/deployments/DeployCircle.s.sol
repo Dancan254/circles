@@ -55,6 +55,7 @@ contract DeployCircle is Script {
         Circle circle = new Circle(
             IERC20(tokenAddress), contributionAmount, subscriptionId, vrfCoordinatorAddress, yieldDispatcherAddress
         );
+        circle.setLocalProtocol(helperConfig.ERC4626VaultFuji());
 
         if (address(circle) == address(0)) revert CircleDeploymentFailed();
 

@@ -25,9 +25,11 @@ contract Circle is AccessControl, VRFConsumerBaseV2Plus {
     error InvalidAmount(uint256 amount);
     error InvalidWithdrawAmount(uint256 amount, uint256 withdrawable);
     error PayoutPeriodNotReached(uint256 lastPayoutDate, uint256 payoutPeriod);
+    error InvalidLocalProtocol(address localProtocol);
 
     IERC20 public immutable circleToken;
     address public immutable s_yieldDispatcher;
+    address public localProtocol;
 
     mapping(address => uint256) public contributions;
     mapping(address => uint256) public withdrawableAmount;
@@ -106,7 +108,10 @@ contract Circle is AccessControl, VRFConsumerBaseV2Plus {
         if (_amount > withdrawable) revert InvalidWithdrawAmount(_amount, withdrawable);
 
         if (circleToken.balanceOf(address(this)) < _amount) {
-            _requestWithdrawal(0, _amount, msg.sender);
+            if (localProtocol == address(0)) {
+                revert InvalidLocalProtocol(localProtocol);
+            }
+            _requestWithdrawal(0, _amount, msg.sender, localProtocol);
         }
 
         withdrawableAmount[msg.sender] -= _amount;
@@ -269,6 +274,7 @@ contract Circle is AccessControl, VRFConsumerBaseV2Plus {
         require(_amount > 0, "Amount must be greater than zero");
         require(circleToken.balanceOf(address(this)) >= _amount, "Insufficient balance");
 
+        circleToken.safeIncreaseAllowance(s_yieldDispatcher, _amount);
         IYieldDispatcher(s_yieldDispatcher).deployFunds(_amount, _destinationChain, _protocol);
     }
 
@@ -279,11 +285,12 @@ contract Circle is AccessControl, VRFConsumerBaseV2Plus {
      * @param _recipient Address to receive withdrawn funds
      * @dev Only circle members can request withdrawals
      */
-    function requestWithdrawal(uint64 _destinationChain, uint256 _amount, address _recipient)
+    function requestWithdrawal(uint64 _destinationChain, uint256 _amount, address _recipient, address _protocol)
         external
         onlyRole(CIRCLER)
     {
-        _requestWithdrawal(_destinationChain, _amount, _recipient);
+        circleToken.safeIncreaseAllowance(s_yieldDispatcher, 1);
+        _requestWithdrawal(_destinationChain, _amount, _recipient, _protocol);
     }
 
     /**
@@ -292,11 +299,18 @@ contract Circle is AccessControl, VRFConsumerBaseV2Plus {
      * @param _amount Amount to withdraw
      * @param _recipient Address to receive withdrawn funds
      */
-    function _requestWithdrawal(uint64 _destinationChain, uint256 _amount, address _recipient) internal {
+    function _requestWithdrawal(uint64 _destinationChain, uint256 _amount, address _recipient, address _protocol)
+        internal
+    {
         require(s_yieldDispatcher != address(0), "Yield dispatcher not set");
         require(_amount > 0, "Amount must be greater than zero");
 
-        IYieldDispatcher(s_yieldDispatcher).requestWithdrawal(_destinationChain, _amount, _recipient);
+        IYieldDispatcher(s_yieldDispatcher).requestWithdrawal(_destinationChain, _amount, _recipient, _protocol);
+    }
+
+    function setLocalProtocol(address _protocol) external onlyRole(CIRCLER) {
+        require(_protocol != address(0), "Invalid protocol address");
+        localProtocol = _protocol;
     }
 
     /*//////////////////////////////////////////////////////////////

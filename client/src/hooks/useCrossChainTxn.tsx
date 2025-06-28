@@ -11,9 +11,7 @@ export function useCrossChainTxn(address: string) {
   const { data, isLoading, error } = useQuery({
     queryKey: ["cross-chain-txn", address],
     queryFn: async () => {
-      const res = await fetch(
-        `${API_URL}/api/cross-chain-txn?address=${address}`
-      );
+      const res = await fetch(`${API_URL}${address}`);
       console.log(res);
       const data = await res.json();
       console.log(data);

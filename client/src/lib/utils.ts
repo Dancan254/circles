@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import avax from "@/assets/lottie/avax.png";
+import { TOKEN_DECIMALS } from "@/mock";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -16,13 +17,13 @@ export function splitBalance(balance: number | undefined) {
 
 export function getConversionRate(
   amount: number | undefined,
-  from: "usdc" | "usdt"
+  from: "usdc" | "usd"
 ): number {
   if (!amount) return 0;
   switch (from) {
     case "usdc":
       return Number((amount * 0.99789).toFixed(2));
-    case "usdt":
+    case "usd":
       return Number((amount * 1.00211).toFixed(2));
   }
 }
@@ -64,4 +65,9 @@ export function getEcosystemImage(ecosystem: string): string {
     default:
       return "";
   }
+}
+
+export function convertBalance(balance: BigInt | undefined) {
+  if (!balance) return 0;
+  return Number(balance) / 10 ** TOKEN_DECIMALS;
 }

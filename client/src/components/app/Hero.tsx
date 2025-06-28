@@ -1,8 +1,10 @@
 import hero from "@/assets/lottie/pools.json";
 import Lottie from "lottie-react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 function Hero() {
+  const navigate = useNavigate();
   return (
     <div className="flex flex-col items-center justify-center text-center h-screen">
       <motion.h1
@@ -54,8 +56,9 @@ function Hero() {
               transition: { duration: 0.5, ease: "easeOut" },
             },
           }}
+          onClick={() => navigate("/dashboard")}
         >
-          Create Circle
+          Launch App
         </motion.button>
         <motion.button
           className="px-4 py-2 bg-background border border-border rounded-full text-white font-bold w-full md:w-1/8 text-lg"
@@ -67,6 +70,7 @@ function Hero() {
               transition: { duration: 0.5, ease: "easeOut" },
             },
           }}
+          onClick={() => navigate("/dashboard")}
         >
           Join a Circle
         </motion.button>

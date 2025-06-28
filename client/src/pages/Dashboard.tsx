@@ -1,7 +1,7 @@
 import usdc from "@/assets/lottie/usdc.svg";
-import { DollarSign, Plus } from "lucide-react";
+import { DollarSign, Loader2, Plus } from "lucide-react";
 import { BriefEarningsChart } from "@/components/app/BriefEarningsChart";
-import { CIRCLES, ROLE } from "@/mock";
+import { CIRCLE_ADDRESS, CIRCLES, ROLE } from "@/mock";
 import CircleCard from "@/components/app/CircleCard";
 import { motion } from "framer-motion";
 import { splitBalance } from "@/lib/utils";
@@ -9,13 +9,12 @@ import CrossChainTxn from "@/components/app/CrossChainTxn";
 import { useActiveAccount, useReadContract } from "thirdweb/react";
 import { contract } from "@/lib/client";
 import Loading from "@/components/app/Loading";
+import { useCircleBalance } from "@/hooks/useCircleBalance";
 
-const BALANCE = 1000;
 const CLAIMABLE_BALANCE = 10.67;
 const CIRCLE_INVESTMENT = 200.89;
 
 function Dashboard() {
-  const { integerPart, decimalPart } = splitBalance(BALANCE);
   const {
     integerPart: claimableIntegerPart,
     decimalPart: claimableDecimalPart,
@@ -27,6 +26,9 @@ function Dashboard() {
       "function hasRole(bytes32 role, address account) view returns (bool)",
     params: [ROLE, activeAccount?.address || ""],
   });
+  const { data: circleBalance, isLoading: circleBalanceLoading } =
+    useCircleBalance(CIRCLE_ADDRESS);
+  const { integerPart, decimalPart } = splitBalance(circleBalance);
 
   if (isPending) {
     return <Loading size="lg" />;
@@ -70,21 +72,29 @@ function Dashboard() {
                 <p className="text-sm font-bold">Contribute</p>
               </button>
             </div>
-            <div className="flex items-center gap-1 border border-gray-700 rounded-full py-1 w-fit px-2">
-              <img src={usdc} alt="USDC" className="w-4 h-4" />
-              <p className="text-sm font-bold">USDC</p>
-            </div>
+            {circleBalanceLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <div className="flex items-center gap-1 border border-gray-700 rounded-full py-1 w-fit px-2">
+                {circleBalance}
+                <img src={usdc} alt="USDC" className="w-4 h-4" />
+                <p className="text-sm font-bold">USDC</p>
+              </div>
+            )}
             <div className="flex items-center justify-between">
               <div className="flex items-center">
+                <p className="text-sm font-light text-gray-400 ml-2 mr-1">
+                  You've contributed{" "}
+                </p>
                 <DollarSign className="w-4 h-4 text-muted-foreground" />
-                <p className="text-xl font-bold">
+                <p className="text-lg font-bold">
                   {CIRCLE_INVESTMENT.toLocaleString("en-US", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
-                  })}
+                  })}{" "}
                 </p>
-                <p className="text-sm font-light text-gray-400 ml-2">
-                  Invested on Ethereum Sepolia
+                <p className="text-sm font-light text-gray-400 ml-1">
+                  in this circle.
                 </p>
               </div>
             </div>

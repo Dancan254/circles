@@ -14,7 +14,11 @@ import {
 } from "@/components/ui/tooltip";
 import { MultiStepLoader as Loader } from "@/components/ui/multi-step-loader";
 import { useCrossChainTxn } from "@/hooks/useCrossChainTxn";
-import { loadingStates, type CrossChainTxn } from "@/mock";
+import {
+  CIRCLE_DISPATCHER_ADDRESS,
+  loadingStates,
+  type CrossChainTxn,
+} from "@/mock";
 import Loading from "./Loading";
 import { CheckCircle, ExternalLink, Loader2, X } from "lucide-react";
 import { getChainImage, getChainName } from "@/lib/utils";
@@ -23,10 +27,12 @@ import { useState } from "react";
 import loading from "@/assets/lottie/success.json";
 import Lottie from "lottie-react";
 
-const ADDRESS = "0xc089c6574ba12ef9db724757fd3886ed49940e1f";
-
 export default function CrossChainTxn() {
-  const { data: transactions, isLoading, error } = useCrossChainTxn(ADDRESS);
+  const {
+    data: transactions,
+    isLoading,
+    error,
+  } = useCrossChainTxn(CIRCLE_DISPATCHER_ADDRESS);
   const [showTxnStatus, setShowTxnStatus] = useState(false);
   const [showSuccessTxn, setShowSuccessTxn] = useState(false);
 

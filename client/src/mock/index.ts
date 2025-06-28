@@ -4,6 +4,12 @@ import avax from "@/assets/lottie/avax.png";
 export const ROLE =
   "0x0eef666beafdac323f3c3096f2bd07e212d61fe2936864cef12d518ed6522f83";
 
+export const TOKEN_ADDRESS = "0x60A15CA6b63508562d0Cdc9Cf896A9e3bBF79463";
+export const TOKEN_DECIMALS = 18;
+export const CIRCLE_ADDRESS = "0xb8c7fb66D2f2d71F47378CAcA7f9ca32008F3286";
+export const CIRCLE_DISPATCHER_ADDRESS =
+  "0xc089c6574ba12ef9db724757fd3886ed49940e1f";
+
 export interface Network {
   name: string;
   chainId: number;

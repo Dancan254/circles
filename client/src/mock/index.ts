@@ -159,3 +159,29 @@ export const loadingStates = [
     text: "Cross-Chain Transfer Complete",
   },
 ];
+
+export interface Txn {
+  chainId: string;
+  ecosystems: string[];
+  blockNumber: number;
+  txIndex: number;
+  timestamp: string; // ISO date string
+  from: {
+    id: string;
+    isContract: boolean;
+  };
+  to: {
+    id: string;
+    isContract: boolean;
+  };
+  blockHash: string;
+  txHash: string;
+  value: string;
+  gasLimit: string;
+  gasUsed: string;
+  gasPrice: string;
+  burnedFees: string;
+  methodId: string;
+  type: string;
+  status: boolean;
+}

@@ -52,3 +52,16 @@ export function getChainName(chain: string): string {
       return "";
   }
 }
+
+export function getEcosystemImage(ecosystem: string): string {
+  switch (ecosystem) {
+    case "avalanche":
+      return avax;
+    case "ethereum":
+      return "https://assets.coingecko.com/coins/images/279/large/ethereum.png?1746003173";
+    case "polygon":
+      return "https://developers.moralis.com/wp-content/uploads/web3wiki/116-mumbai/637adca2e1a09547acd85968_Y_44LwHNRnOEvnRExgnO1UujtZwn7zq7BCb4oxxHgpI-300x300.jpeg";
+    default:
+      return "";
+  }
+}

@@ -203,7 +203,7 @@ function Circle() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.8, ease: "easeOut" }}
         >
-          <Transactions transactions={circle?.txnHistory || []} />
+          <Transactions />
         </motion.div>
       </motion.div>
       {isOpen && (

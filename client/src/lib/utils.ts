@@ -39,3 +39,16 @@ export function getChainImage(chain: string): string {
       return "";
   }
 }
+
+export function getChainName(chain: string): string {
+  switch (chain) {
+    case "avalanche-testnet-fuji":
+      return "Avalanche Testnet";
+    case "ethereum-testnet-sepolia":
+      return "Ethereum Testnet";
+    case "polygon-testnet-mumbai":
+      return "Polygon Testnet";
+    default:
+      return "";
+  }
+}

@@ -3,12 +3,18 @@ import loading from "@/assets/lottie/wallets.json";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 
-function Loading({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
+function Loading({ size = "md" }: { size?: "xs" | "sm" | "md" | "lg" }) {
   return (
     <div
       className={cn(
         "flex flex-col items-center justify-center",
-        size === "sm" ? "h-1/2" : size === "md" ? "h-1/2" : "h-screen"
+        size === "xs"
+          ? "h-1/4"
+          : size === "sm"
+          ? "h-1/2"
+          : size === "md"
+          ? "h-1/2"
+          : "h-screen"
       )}
     >
       <Lottie animationData={loading} loop={true} />

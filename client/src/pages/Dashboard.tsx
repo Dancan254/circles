@@ -5,13 +5,11 @@ import { CIRCLES } from "@/mock";
 import CircleCard from "@/components/app/CircleCard";
 import { motion } from "framer-motion";
 import { splitBalance } from "@/lib/utils";
-import { useCrossChainTxn } from "@/hooks/useCrossChainTxn";
-import Loading from "@/components/app/Loading";
+import CrossChainTxn from "@/components/app/CrossChainTxn";
 
 const BALANCE = 1000;
 const CLAIMABLE_BALANCE = 10.67;
 const CIRCLE_INVESTMENT = 200.89;
-const ADDRESS = "0x0bd7dd9a885d9526ff82813829ef5c7d8afdb8c4";
 
 function Dashboard() {
   const { integerPart, decimalPart } = splitBalance(BALANCE);
@@ -19,20 +17,6 @@ function Dashboard() {
     integerPart: claimableIntegerPart,
     decimalPart: claimableDecimalPart,
   } = splitBalance(CLAIMABLE_BALANCE);
-  const { data, isLoading, error } = useCrossChainTxn(ADDRESS);
-  console.log(data);
-
-  if (isLoading) {
-    return <Loading size="lg" />;
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-screen text-primary">
-        Error: {error.message}
-      </div>
-    );
-  }
 
   return (
     <motion.div
@@ -164,6 +148,9 @@ function Dashboard() {
       >
         My Cross-Chain Transactions
       </motion.h1>
+      <motion.div>
+        <CrossChainTxn />
+      </motion.div>
       <motion.h1
         className="text-2xl font-bold mt-10"
         initial={{ opacity: 0, y: 20 }}

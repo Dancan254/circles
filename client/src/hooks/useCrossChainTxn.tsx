@@ -1,18 +1,23 @@
 import type { CrossChainTxn } from "@/mock";
 import { useQuery } from "@tanstack/react-query";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 if (!API_URL) {
-  throw new Error("VITE_API_URL is not set");
+  throw new Error("VITE_BACKEND_URL is not set");
 }
 
 export function useCrossChainTxn(address: string) {
   const { data, isLoading, error } = useQuery({
     queryKey: ["cross-chain-txn", address],
     queryFn: async () => {
-      const res = await fetch(`${API_URL}/${address}`);
-      return (await res.json()) as CrossChainTxn[];
+      const res = await fetch(
+        `${API_URL}/api/cross-chain-txn?address=${address}`
+      );
+      console.log(res);
+      const data = await res.json();
+      console.log(data);
+      return data as CrossChainTxn[];
     },
   });
 

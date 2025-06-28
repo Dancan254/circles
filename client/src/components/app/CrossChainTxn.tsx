@@ -23,7 +23,7 @@ import { useState } from "react";
 import loading from "@/assets/lottie/success.json";
 import Lottie from "lottie-react";
 
-const ADDRESS = "0x0bd7dd9a885d9526ff82813829ef5c7d8afdb8c4";
+const ADDRESS = "0x4D2BEa56B2A2f894ceaee449E81242235984FC54";
 
 export default function CrossChainTxn() {
   const { data: transactions, isLoading, error } = useCrossChainTxn(ADDRESS);

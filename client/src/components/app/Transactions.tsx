@@ -58,6 +58,7 @@ function Transactions() {
             <TableCell className="w-[100px]">
               {transaction.ecosystems.map((ecosystem) => (
                 <img
+                  key={ecosystem}
                   src={getEcosystemImage(ecosystem)}
                   alt={ecosystem}
                   className="w-4 h-4"

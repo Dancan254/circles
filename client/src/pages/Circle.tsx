@@ -2,10 +2,19 @@ import { FullEarningsChart } from "@/components/app/FullEarningsChart";
 import Transactions from "@/components/app/Transactions";
 import { getConversionRate, splitBalance } from "@/lib/utils";
 import { networks } from "@/mock";
-import { ArrowLeft, Copy, DollarSign, ExternalLink, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Copy,
+  DollarSign,
+  ExternalLink,
+  Loader2,
+  X,
+} from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
+import { prepareEvent } from "thirdweb";
+import { useContractEvents } from "thirdweb/react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -17,9 +26,25 @@ import {
 import useCircle from "@/hooks/useCircle";
 import Loading from "@/components/app/Loading";
 import { toast } from "react-hot-toast";
+import { contract } from "@/lib/client";
+import useNextRecipient from "@/hooks/useNextRecipient";
 
 function Circle() {
   const { address } = useParams();
+  const preparedEvent = prepareEvent({
+    signature:
+      "event SelectedRecipient(address indexed recipient, uint256 amount)",
+  });
+
+  const { data: event } = useContractEvents({
+    contract,
+    events: [preparedEvent],
+  });
+  const recipient =
+    event?.length !== 0 ? event?.[event.length - 1]?.args.recipient : address;
+  console.log(recipient);
+  const { onClick, isPending } = useNextRecipient();
+
   const { circle, isLoading } = useCircle(address as string);
   const { integerPart, decimalPart } = splitBalance(circle?.balance);
   const [isOpen, setIsOpen] = useState(false);
@@ -111,7 +136,10 @@ function Circle() {
           transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
           className="flex flex-row gap-2 items-center mx-2 md:mx-0"
         >
-          <button className="text-sm font-bold bg-transparent text-white border border-gray-700 rounded-3xl py-2 px-4 flex items-center gap-1">
+          <button
+            className="text-sm font-bold bg-transparent text-white border border-gray-700 rounded-3xl py-2 px-4 flex items-center gap-1"
+            onClick={onClick}
+          >
             Refresh Next Recipient
           </button>
           <button
@@ -128,15 +156,19 @@ function Circle() {
           className="text-muted-foreground text-sm mx-2 md:mx-0 mt-4"
         >
           Next Recipient Address:
-          <Link
-            to={`https://etherscan.io/address/${circle?.address}`}
-            target="_blank"
-            className="text-gray-400 underline text-sm w-fit flex items-center gap-1 mt-1 hover:text-primary transition-colors duration-300"
-          >
-            {circle?.address.slice(0, 6)}...
-            {circle?.address.slice(-4)}
-            <ExternalLink className="w-4 h-4 cursor-pointer" />
-          </Link>
+          {isPending ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Link
+              to={`https://etherscan.io/address/${circle?.address}`}
+              target="_blank"
+              className="text-gray-400 underline text-sm w-fit flex items-center gap-1 mt-1 hover:text-primary transition-colors duration-300"
+            >
+              {recipient?.slice(0, 6)}...
+              {recipient?.slice(-4)}
+              <ExternalLink className="w-4 h-4 cursor-pointer" />
+            </Link>
+          )}
         </motion.p>
       </div>
       <motion.div

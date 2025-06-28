@@ -80,6 +80,9 @@ importers:
       web3:
         specifier: ^4.16.0
         version: 4.16.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.67)
+      web3-types:
+        specifier: 1.4.1-dev.9023511.0
+        version: 1.4.1-dev.9023511.0
     devDependencies:
       '@eslint/js':
         specifier: ^9.29.0
@@ -5816,6 +5819,10 @@ packages:
 
   web3-types@1.10.0:
     resolution: {integrity: sha512-0IXoaAFtFc8Yin7cCdQfB9ZmjafrbP6BO0f0KT/khMhXKUpoJ6yShrVhiNpyRBo8QQjuOagsWzwSK2H49I7sbw==}
+    engines: {node: '>=14', npm: '>=6.12.0'}
+
+  web3-types@1.4.1-dev.9023511.0:
+    resolution: {integrity: sha512-8lrlEwqOnzor9FKJUNybFj1Y9WwwBfydp90WoHN3SkYSs2gthNwWYe2gY9U4aIUgADhbvcuQZfV6AQjJEAgiEQ==}
     engines: {node: '>=14', npm: '>=6.12.0'}
 
   web3-utils@1.10.4:
@@ -13978,6 +13985,8 @@ snapshots:
       - utf-8-validate
 
   web3-types@1.10.0: {}
+
+  web3-types@1.4.1-dev.9023511.0: {}
 
   web3-utils@1.10.4:
     dependencies:

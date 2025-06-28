@@ -1,7 +1,7 @@
 "use client";
 
 import { TrendingUp } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
 import {
   Card,
@@ -18,15 +18,15 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 
-export const description = "A bar chart";
+export const description = "An area chart";
 
 const chartData = [
-  { month: "January", earnings: 1.86 },
-  { month: "February", earnings: 3.05 },
-  { month: "March", earnings: 2.37 },
-  { month: "April", earnings: 0.73 },
-  { month: "May", earnings: 2.09 },
-  { month: "June", earnings: 2.14 },
+  { day: "Monday", earnings: 0.32 },
+  { day: "Tuesday", earnings: 0.45 },
+  { day: "Wednesday", earnings: 0.51 },
+  { day: "Thursday", earnings: 0.38 },
+  { day: "Friday", earnings: 0.62 },
+  { day: "Saturday", earnings: 0.29 },
 ];
 
 const chartConfig = {
@@ -40,34 +40,41 @@ export function FullEarningsChart() {
   return (
     <Card className="mx-2 md:mx-0 bg-transparent">
       <CardHeader>
-        <CardTitle>Earnings Bar Chart</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
+        <CardTitle>Earnings Area Chart</CardTitle>
+        <CardDescription>Monday - Saturday</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[450px] w-full">
-          <BarChart accessibilityLayer data={chartData}>
+          <AreaChart data={chartData}>
             <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="month"
+              dataKey="day"
               tickLine={false}
               tickMargin={10}
               axisLine={false}
-              tickFormatter={(value) => value.slice(0, 3)}
             />
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent hideLabel />}
             />
-            <Bar dataKey="earnings" fill="var(--color-earnings)" radius={8} />
-          </BarChart>
+            <Area
+              type="monotone"
+              dataKey="earnings"
+              stroke="var(--primary)"
+              fill="var(--primary)"
+              fillOpacity={0.2}
+              strokeWidth={2}
+              dot={false}
+            />
+          </AreaChart>
         </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 leading-none font-medium">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+          Trending up by 5.2% this week <TrendingUp className="h-4 w-4" />
         </div>
         <div className="text-muted-foreground leading-none">
-          Showing total earnings for the last 6 months
+          Showing total earnings for the last 6 days
         </div>
       </CardFooter>
     </Card>

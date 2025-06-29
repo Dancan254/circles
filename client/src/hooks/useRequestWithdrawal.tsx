@@ -5,7 +5,7 @@ import { prepareContractCall } from "thirdweb";
 import { useSendTransaction } from "thirdweb/react";
 
 export default function useRequestWithdrawal() {
-  const { mutate: sendTransaction, isPending } = useSendTransaction();
+  const { mutate: sendTransaction, isPending, error } = useSendTransaction();
 
   const onRequestWithdrawal = ({
     amount,
@@ -23,6 +23,7 @@ export default function useRequestWithdrawal() {
       });
       return;
     }
+    console.log("Amount", amount);
     const transaction = prepareContractCall({
       contract: contract,
       method: "function requestWithdrawal(uint64, uint256, address, address)",
@@ -34,6 +35,7 @@ export default function useRequestWithdrawal() {
       ],
     });
     sendTransaction(transaction);
+    console.log("Error", error);
   };
 
   return { onRequestWithdrawal, isPending };

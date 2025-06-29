@@ -4,7 +4,7 @@ import { prepareContractCall } from "thirdweb";
 import { useSendTransaction } from "thirdweb/react";
 
 export default function useDeployIdleFunds() {
-  const { mutate: sendTransaction, isPending } = useSendTransaction();
+  const { mutate: sendTransaction, isPending, error } = useSendTransaction();
 
   const onClick = ({ amount }: { amount: bigint }) => {
     const transaction = prepareContractCall({
@@ -17,6 +17,7 @@ export default function useDeployIdleFunds() {
       ],
     });
     sendTransaction(transaction);
+    console.log("Error", error);
   };
 
   return { onClick, isPending };

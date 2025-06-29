@@ -1,4 +1,5 @@
 import { contract } from "@/lib/client";
+import { toast } from "react-hot-toast";
 import { prepareContractCall } from "thirdweb";
 import { useSendTransaction } from "thirdweb/react";
 
@@ -12,6 +13,12 @@ export default function useClaimUsdc() {
       params: [amount],
     });
     sendTransaction(transaction);
+    toast.success("USDC claimed!", {
+      style: {
+        background: "var(--background)",
+        color: "var(--foreground)",
+      },
+    });
   };
 
   return { onClaim, isPending };

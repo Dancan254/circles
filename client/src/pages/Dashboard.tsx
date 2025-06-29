@@ -92,29 +92,6 @@ function Dashboard() {
     }
   }
 
-  function handleClaim() {
-    if (isApproved) {
-      onClaim({
-        amount: convertBalanceToWei(claimAmount),
-      });
-      toast.success("USDC claimed!", {
-        style: {
-          background: "var(--background)",
-          color: "var(--foreground)",
-        },
-      });
-      setIsApproved(false);
-    } else {
-      toast.error("Please approve the contract to claim!", {
-        style: {
-          background: "var(--background)",
-          color: "var(--foreground)",
-        },
-      });
-      handleApprove({ amount: claimAmount });
-    }
-  }
-
   if (isPending) {
     return <Loading size="lg" />;
   }
@@ -423,14 +400,16 @@ function Dashboard() {
                     <div className="flex items-center md:justify-end justify-center w-full mt-4">
                       <button
                         className="text-sm font-bold hover:bg-primary/10 transition-all duration-300 bg-transparent text-primary border border-primary rounded-3xl py-2 px-4 flex items-center gap-1"
-                        onClick={handleClaim}
+                        onClick={() => {
+                          onClaim({
+                            amount: convertBalanceToWei(claimAmount),
+                          });
+                        }}
                       >
-                        {isClaimingPending || isApprovePending ? (
+                        {isClaimingPending ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : isApproved ? (
-                          `Claim ${claimAmount} USDC to ${selectedNetwork.name}`
                         ) : (
-                          "Approve USDC"
+                          `Claim ${claimAmount} USDC to ${selectedNetwork.name}`
                         )}
                       </button>
                     </div>

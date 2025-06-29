@@ -4,6 +4,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 )
 
 func getChainlinkData(address string) ([]byte, error){
@@ -55,6 +56,12 @@ func getAddressCrossChainTxn(w http.ResponseWriter, r *http.Request){
 func main(){
 	http.HandleFunc("/api/cross-chain-txn", getAddressCrossChainTxn)
 
-	log.Println("Server is running on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	port := os.Getenv("PORT")
+	if port == ""{
+		port = "8080"
+	}
+	log.Println("Server is running on port", port)
+	if err := http.ListenAndServe(":"+port, nil); err != nil{
+		log.Fatal(err)
+	}
 }

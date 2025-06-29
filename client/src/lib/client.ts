@@ -1,4 +1,4 @@
-import { CIRCLE_ADDRESS } from "@/mock";
+import { CIRCLE_ADDRESS, TOKEN_ADDRESS } from "@/mock";
 import { getContract } from "thirdweb";
 import { defineChain } from "thirdweb";
 import { createThirdwebClient } from "thirdweb";
@@ -21,4 +21,10 @@ export const contract = getContract({
   client,
   chain: defineChain(43113),
   address: CIRCLE_ADDRESS,
+});
+
+export const tokenContract = getContract({
+  client,
+  chain: defineChain(43113),
+  address: TOKEN_ADDRESS,
 });

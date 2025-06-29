@@ -2,17 +2,17 @@ import { contract } from "@/lib/client";
 import { prepareContractCall } from "thirdweb";
 import { useSendTransaction } from "thirdweb/react";
 
-export default function useClaimUsdc() {
-  const { mutate: sendTransaction, isPending } = useSendTransaction();
+export default function useContribute() {
+  const { mutate: sendTransaction, isPending, error } = useSendTransaction();
 
-  const onClaim = ({ amount }: { amount: bigint }) => {
+  const onContribute = ({ amount }: { amount: bigint }) => {
     const transaction = prepareContractCall({
       contract: contract,
-      method: "function withdraw(uint256)",
+      method: "function contribute(uint256)",
       params: [amount],
     });
     sendTransaction(transaction);
   };
 
-  return { onClaim, isPending };
+  return { onContribute, isPending, error };
 }

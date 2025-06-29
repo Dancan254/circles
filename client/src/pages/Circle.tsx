@@ -8,6 +8,7 @@ import {
   DollarSign,
   ExternalLink,
   Loader2,
+  Plus,
   X,
 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
@@ -42,7 +43,6 @@ function Circle() {
   });
   const recipient =
     event?.length !== 0 ? event?.[event.length - 1]?.args.recipient : address;
-  console.log(recipient);
   const { onClick, isPending } = useNextRecipient();
 
   const { circle, isLoading } = useCircle(address as string);
@@ -56,7 +56,7 @@ function Circle() {
   }
   return (
     <motion.div
-      className="my-0 max-w-screen-2xl mx-auto mt-4"
+      className="my-0 max-w-7xl mx-auto mt-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -130,46 +130,90 @@ function Circle() {
         </motion.div>
       </motion.div>
       <div className="max-w-7xl mx-auto mt-8">
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
-          className="flex flex-row gap-2 items-center mx-2 md:mx-0"
-        >
-          <button
-            className="text-sm font-bold bg-transparent text-white border border-gray-700 rounded-3xl py-2 px-4 flex items-center gap-1"
-            onClick={onClick}
+        <div className="flex gap-2 md:items-center mx-2 md:mx-0 flex-row justify-between w-full overflow-x-auto">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
+            className="flex flex-row gap-2 items-center mx-2 md:mx-0"
           >
-            Refresh Next Recipient
-          </button>
-          <button
-            onClick={() => setIsOpen(true)}
-            className="text-sm font-bold bg-transparent text-primary border border-primary rounded-3xl py-2 px-4 flex items-center gap-1"
-          >
-            Deploy Idle USDC
-          </button>
-        </motion.div>
-        <motion.p
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
-          className="text-muted-foreground text-sm mx-2 md:mx-0 mt-4"
-        >
-          Next Recipient Address:
-          {isPending ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Link
-              to={`https://etherscan.io/address/${circle?.address}`}
-              target="_blank"
-              className="text-gray-400 underline text-sm w-fit flex items-center gap-1 mt-1 hover:text-primary transition-colors duration-300"
+            <button
+              className="text-sm w-[200px] font-bold bg-transparent text-white border border-gray-700 rounded-3xl py-2 px-4 flex items-center gap-1"
+              onClick={onClick}
             >
-              {recipient?.slice(0, 6)}...
-              {recipient?.slice(-4)}
-              <ExternalLink className="w-4 h-4 cursor-pointer" />
-            </Link>
-          )}
-        </motion.p>
+              Refresh Recipient
+            </button>
+            <button
+              onClick={() => setIsOpen(true)}
+              className="text-sm font-bold w-[200px]  bg-transparent hover:bg-primary/20 text-primary border border-primary rounded-3xl py-2 px-4 flex items-center gap-1"
+            >
+              Deploy Idle USDC
+            </button>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
+            className="flex flex-row gap-2 items-center mx-2 md:mx-0"
+          >
+            <button
+              onClick={() => setIsOpen(true)}
+              className="text-sm font-bold w-[200px]  flex items-center gap-1 hover:bg-primary/20 transition-colors duration-300 bg-transparent text-primary border border-primary rounded-3xl py-2 px-4"
+            >
+              Add Member
+              <Plus className="w-4 h-4" />
+            </button>
+            <button
+              className="text-sm font-bold w-[200px]  bg-transparent text-white border border-gray-700 rounded-3xl py-2 px-4 flex items-center gap-1"
+              onClick={onClick}
+            >
+              Withdraw Investment
+            </button>
+          </motion.div>
+        </div>
+        <div className="flex flex-row md:items-center justify-between">
+          <motion.p
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
+            className="text-muted-foreground text-sm mx-2 md:mx-0 mt-4"
+          >
+            Next Recipient Address:
+            {isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Link
+                to={`https://etherscan.io/address/${circle?.address}`}
+                target="_blank"
+                className="text-gray-400 underline text-sm w-fit flex items-center gap-1 mt-1 hover:text-primary transition-colors duration-300"
+              >
+                {recipient?.slice(0, 6)}...
+                {recipient?.slice(-4)}
+                <ExternalLink className="w-4 h-4 cursor-pointer" />
+              </Link>
+            )}
+          </motion.p>
+          <motion.p
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
+            className="text-muted-foreground text-sm mx-2 md:mx-0 mt-4"
+          >
+            Available Investment:
+            {isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Link
+                to={`https://etherscan.io/address/${circle?.address}`}
+                target="_blank"
+                className="text-gray-400 underline text-sm w-fit flex items-center gap-1 mt-1 hover:text-primary transition-colors duration-300"
+              >
+                {circle?.balance} USDC
+                <ExternalLink className="w-4 h-4 cursor-pointer" />
+              </Link>
+            )}
+          </motion.p>
+        </div>
       </div>
       <motion.div
         className="max-w-7xl mx-auto mt-8"

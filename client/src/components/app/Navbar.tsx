@@ -18,7 +18,7 @@ function Navbar() {
     setIsOpen(false);
   };
   return (
-    <div className="flex items-center justify-between mt-4 mx-2">
+    <div className="flex items-center justify-between mt-4 mx-2 mb-12 md:mb-0">
       <div
         className="flex items-center justify-center text-center cursor-pointer"
         onClick={() => navigate("/")}
@@ -27,7 +27,7 @@ function Navbar() {
       </div>
       <div className="flex items-center gap-2">
         <div
-          className="flex items-center w-20 h-10 bg-muted rounded-full p-2 justify-between cursor-pointer"
+          className="flex items-center w-16 md:w-20 h-8 md:h-10 bg-muted rounded-full p-1 md:p-2 justify-between cursor-pointer"
           onClick={() => setIsOpen(true)}
         >
           <img
@@ -46,6 +46,10 @@ function Navbar() {
             style: {
               backgroundColor: "var(--primary)",
               borderRadius: "30px",
+              height: "35px",
+              width: "80px",
+              fontSize: "14px",
+              paddingTop: "10px",
             },
           }}
           chains={[avalancheFuji, sepolia]}

@@ -60,7 +60,7 @@ public class BlockchainService {
             web3j = Web3j.build(new HttpService(rpcUrl));
 
             // Load credentials from private key
-            String privateKey = "7a8e2bfe14a90740d7ce9c996fdc14a5f51513c7820f721bdf319aaf3dc27842";
+            String privateKey = "xxxxxx";
             credentials = Credentials.create(privateKey);
 
             // Log wallet address for funding and verification

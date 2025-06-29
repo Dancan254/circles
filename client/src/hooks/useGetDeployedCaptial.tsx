@@ -1,13 +1,16 @@
-import { useReadContract } from "thirdweb/react";
-import { protocolContract } from "@/lib/client";
-import { DESTINATION_CHAIN_SELECTOR } from "@/mock";
+import { useWalletBalance } from "thirdweb/react";
+import { client } from "@/lib/client";
+import { MOCK_VAULT_ADDRESS, TOKEN_ADDRESS } from "@/mock";
+import { sepolia } from "thirdweb/chains";
+import { convertBalance } from "@/lib/utils";
 
 export default function useGetDeployedCapital() {
-  const { data, isPending } = useReadContract({
-    contract: protocolContract,
-    method: "function getDeployedCapitalOnChain(uint64) view returns (uint256)",
-    params: [BigInt(DESTINATION_CHAIN_SELECTOR)],
+  const { data, isLoading, isError } = useWalletBalance({
+    chain: sepolia,
+    address: MOCK_VAULT_ADDRESS,
+    client,
+    tokenAddress: TOKEN_ADDRESS,
   });
 
-  return { data, isPending };
+  return { data: convertBalance(data?.value), isLoading, isError };
 }

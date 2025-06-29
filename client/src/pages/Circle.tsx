@@ -1,7 +1,6 @@
 import { FullEarningsChart } from "@/components/app/FullEarningsChart";
 import Transactions from "@/components/app/Transactions";
 import {
-  convertBalance,
   convertBalanceToWei,
   getConversionRate,
   splitBalance,
@@ -60,7 +59,7 @@ function Circle() {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState(networks[0]);
   const [amount, setAmount] = useState(0);
-  const { data: deployedCapital, isPending: isDeployedCapitalPending } =
+  const { data: deployedCapital, isLoading: isDeployedCapitalPending } =
     useGetDeployedCapital();
   const [addMemberAddress, setAddMemberAddress] = useState("");
   const [addMemberModal, setAddMemberModal] = useState(false);
@@ -190,7 +189,9 @@ function Circle() {
               className="text-sm font-bold w-[200px]  bg-transparent text-white border border-gray-700 rounded-3xl py-2 px-4 flex items-center gap-1"
               onClick={() =>
                 onRequestWithdrawal({
-                  amount: deployedCapital,
+                  amount: convertBalanceToWei(
+                    Math.floor(deployedCapital * 0.5)
+                  ),
                   circleAddress: circle?.address,
                 })
               }
@@ -240,7 +241,7 @@ function Circle() {
                 target="_blank"
                 className="text-gray-400 underline text-sm w-fit flex items-center gap-1 mt-1 hover:text-primary transition-colors duration-300"
               >
-                {convertBalance(deployedCapital)} USDC
+                {deployedCapital.toFixed(4)} USDC
                 <ExternalLink className="w-4 h-4 cursor-pointer" />
               </Link>
             )}

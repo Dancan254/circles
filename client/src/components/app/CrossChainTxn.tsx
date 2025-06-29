@@ -23,7 +23,7 @@ import Loading from "./Loading";
 import { CheckCircle, ExternalLink, Loader2, X } from "lucide-react";
 import { getChainImage, getChainName } from "@/lib/utils";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import loading from "@/assets/lottie/success.json";
 import Lottie from "lottie-react";
 
@@ -35,6 +35,18 @@ export default function CrossChainTxn() {
   } = useCrossChainTxn(CIRCLE_DISPATCHER_ADDRESS);
   const [showTxnStatus, setShowTxnStatus] = useState(false);
   const [showSuccessTxn, setShowSuccessTxn] = useState(false);
+
+  useEffect(() => {
+    if (showSuccessTxn) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    // Clean up in case the component unmounts while modal is open
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showSuccessTxn]);
 
   if (isLoading) {
     return <Loading size="xs" />;
@@ -71,7 +83,7 @@ export default function CrossChainTxn() {
 
   if (showSuccessTxn) {
     return (
-      <div className="flex items-center flex-col h-screen justify-center backdrop-blur-sm bg-black/20 absolute top-0 left-0 w-full z-[100]">
+      <div className="flex items-center flex-col h-screen justify-center backdrop-blur-sm bg-black/20 fixed top-0 left-0 w-full z-[100]">
         <Lottie
           animationData={loading}
           loop={true}

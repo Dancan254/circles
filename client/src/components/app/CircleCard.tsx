@@ -20,7 +20,6 @@ function CircleCard({ circle }: { circle: Circle }) {
       "function hasRole(bytes32 role, address account) view returns (bool)",
     params: [ROLE, activeAccount?.address || ""],
   });
-  console.log(circle.address, data);
   const { mutate: sendTransaction } = useSendTransaction();
   const [isLoading, setIsLoading] = useState(false);
 

@@ -1,13 +1,19 @@
 import { FullEarningsChart } from "@/components/app/FullEarningsChart";
 import Transactions from "@/components/app/Transactions";
-import { getConversionRate, splitBalance } from "@/lib/utils";
-import { networks } from "@/mock";
+import {
+  convertBalance,
+  convertBalanceToWei,
+  getConversionRate,
+  splitBalance,
+} from "@/lib/utils";
+import { MOCK_VAULT_ADDRESS, networks } from "@/mock";
 import {
   ArrowLeft,
   Copy,
   DollarSign,
   ExternalLink,
   Loader2,
+  Plus,
   X,
 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
@@ -28,6 +34,10 @@ import Loading from "@/components/app/Loading";
 import { toast } from "react-hot-toast";
 import { contract } from "@/lib/client";
 import useNextRecipient from "@/hooks/useNextRecipient";
+import useGetDeployedCapital from "@/hooks/useGetDeployedCaptial";
+import useAddMember from "@/hooks/useAddMember";
+import useDeployIdleFunds from "@/hooks/useDeployIdleFunds";
+import useRequestWithdrawal from "@/hooks/useRequestWithdrawal";
 
 function Circle() {
   const { address } = useParams();
@@ -42,21 +52,30 @@ function Circle() {
   });
   const recipient =
     event?.length !== 0 ? event?.[event.length - 1]?.args.recipient : address;
-  console.log(recipient);
   const { onClick, isPending } = useNextRecipient();
+  const { onAddMember, isPending: isAddMemberPending } = useAddMember();
 
   const { circle, isLoading } = useCircle(address as string);
   const { integerPart, decimalPart } = splitBalance(circle?.balance);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState(networks[0]);
   const [amount, setAmount] = useState(0);
+  const { data: deployedCapital, isPending: isDeployedCapitalPending } =
+    useGetDeployedCapital();
+  const [addMemberAddress, setAddMemberAddress] = useState("");
+  const [addMemberModal, setAddMemberModal] = useState(false);
+  const { onClick: onDeployIdleFunds, isPending: isDeployIdleFundsPending } =
+    useDeployIdleFunds();
+
+  const { onRequestWithdrawal, isPending: isRequestWithdrawalPending } =
+    useRequestWithdrawal();
 
   if (isLoading) {
     return <Loading size="lg" />;
   }
   return (
     <motion.div
-      className="my-0 max-w-screen-2xl mx-auto mt-4"
+      className="my-0 max-w-7xl mx-auto mt-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -117,7 +136,7 @@ function Circle() {
               }}
             />
           </div>
-          <div className="flex flex-row gap-1 items-center justify-center rounded-2xl mr-4">
+          <div className="flex flex-row gap-1 items-center justify-center rounded-2xl">
             <img
               src={circle?.onChain.icon}
               alt={circle?.onChain.name}
@@ -130,46 +149,103 @@ function Circle() {
         </motion.div>
       </motion.div>
       <div className="max-w-7xl mx-auto mt-8">
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
-          className="flex flex-row gap-2 items-center mx-2 md:mx-0"
-        >
-          <button
-            className="text-sm font-bold bg-transparent text-white border border-gray-700 rounded-3xl py-2 px-4 flex items-center gap-1"
-            onClick={onClick}
+        <div className="flex gap-2 md:items-center mx-2 md:mx-0 flex-row justify-between w-full overflow-x-auto no-scrollbar">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
+            className="flex flex-row gap-2 items-center mx-2 md:mx-0"
           >
-            Refresh Next Recipient
-          </button>
-          <button
-            onClick={() => setIsOpen(true)}
-            className="text-sm font-bold bg-transparent text-primary border border-primary rounded-3xl py-2 px-4 flex items-center gap-1"
-          >
-            Deploy Idle USDC
-          </button>
-        </motion.div>
-        <motion.p
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
-          className="text-muted-foreground text-sm mx-2 md:mx-0 mt-4"
-        >
-          Next Recipient Address:
-          {isPending ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Link
-              to={`https://etherscan.io/address/${circle?.address}`}
-              target="_blank"
-              className="text-gray-400 underline text-sm w-fit flex items-center gap-1 mt-1 hover:text-primary transition-colors duration-300"
+            <button
+              className="text-sm w-[200px] font-bold bg-transparent text-white border border-gray-700 rounded-3xl py-2 px-4 flex items-center gap-1"
+              onClick={onClick}
             >
-              {recipient?.slice(0, 6)}...
-              {recipient?.slice(-4)}
-              <ExternalLink className="w-4 h-4 cursor-pointer" />
-            </Link>
-          )}
-        </motion.p>
+              Refresh Recipient
+            </button>
+            <button
+              onClick={() => setIsOpen(true)}
+              className="text-sm font-bold w-[200px]  bg-transparent hover:bg-primary/20 text-primary border border-primary rounded-3xl py-2 px-4 flex items-center gap-1"
+            >
+              Deploy Idle USDC
+            </button>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
+            className="flex flex-row gap-2 items-center mx-2 md:mx-0"
+          >
+            <button
+              onClick={() => setAddMemberModal(true)}
+              className="text-sm font-bold w-[200px]  flex items-center gap-1 hover:bg-primary/20 transition-colors duration-300 bg-transparent text-primary border border-primary rounded-3xl py-2 px-4"
+            >
+              {isAddMemberPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "Approve Member"
+              )}
+              {isAddMemberPending ? null : <Plus className="w-4 h-4" />}
+            </button>
+            <button
+              className="text-sm font-bold w-[200px]  bg-transparent text-white border border-gray-700 rounded-3xl py-2 px-4 flex items-center gap-1"
+              onClick={() =>
+                onRequestWithdrawal({
+                  amount: deployedCapital,
+                  circleAddress: circle?.address,
+                })
+              }
+            >
+              {isRequestWithdrawalPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "Withdraw Investment"
+              )}
+            </button>
+          </motion.div>
+        </div>
+        <div className="flex flex-row md:items-center justify-between">
+          <motion.p
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
+            className="text-muted-foreground text-sm mx-2 md:mx-0 mt-4"
+          >
+            Next Recipient Address:
+            {isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Link
+                to={`https://etherscan.io/address/${circle?.address}`}
+                target="_blank"
+                className="text-gray-400 underline text-sm w-fit flex items-center gap-1 mt-1 hover:text-primary transition-colors duration-300"
+              >
+                {recipient?.slice(0, 6)}...
+                {recipient?.slice(-4)}
+                <ExternalLink className="w-4 h-4 cursor-pointer" />
+              </Link>
+            )}
+          </motion.p>
+          <motion.p
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
+            className="text-muted-foreground text-sm mx-2 md:mx-0 mt-4"
+          >
+            Available Investment:
+            {isDeployedCapitalPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Link
+                to={`https://sepolia.etherscan.io/address/${MOCK_VAULT_ADDRESS}`}
+                target="_blank"
+                className="text-gray-400 underline text-sm w-fit flex items-center gap-1 mt-1 hover:text-primary transition-colors duration-300"
+              >
+                {convertBalance(deployedCapital)} USDC
+                <ExternalLink className="w-4 h-4 cursor-pointer" />
+              </Link>
+            )}
+          </motion.p>
+        </div>
       </div>
       <motion.div
         className="max-w-7xl mx-auto mt-8"
@@ -290,6 +366,15 @@ function Circle() {
                       onChange={(e) => setAmount(Number(e.target.value))}
                       className="bg-background border border-gray-700 rounded-2xl p-2 w-full md:w-1/2 mt-4 h-12 placeholder:text-gray-400"
                     />
+                    <p className="text-sm text-gray-400">
+                      Maximum Deployable Amount: {circle?.balance} USDC.
+                      <span
+                        className="text-primary ml-1 cursor-pointer"
+                        onClick={() => setAmount(Number(circle?.balance))}
+                      >
+                        Use Max.
+                      </span>
+                    </p>
                     <Select>
                       <SelectTrigger
                         className="w-full md:w-1/2 rounded-2xl mt-2"
@@ -323,12 +408,74 @@ function Circle() {
                       </SelectContent>
                     </Select>
                     <div className="flex items-center md:justify-end justify-center w-full mt-4">
-                      <button className="text-sm font-bold bg-transparent text-primary border border-primary rounded-3xl py-2 px-4 flex items-center gap-1">
-                        Deploy {amount} USDC to {selectedNetwork.name}
+                      <button
+                        className="text-sm font-bold bg-transparent text-primary border border-primary rounded-3xl py-2 px-4 flex items-center gap-1"
+                        onClick={() => {
+                          onDeployIdleFunds({
+                            amount: convertBalanceToWei(amount),
+                          });
+                        }}
+                      >
+                        {isDeployIdleFundsPending ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          `Deploy ${amount} USDC to ${selectedNetwork.name}`
+                        )}
                       </button>
                     </div>
                   </div>
                 </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
+      )}
+      {addMemberModal && (
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="w-full max-w-5xl bg-transparent border border-gray-700 rounded-2xl p-1 md:p-2 mx-2 md:mx-0"
+            >
+              <div className="flex flex-col gap-2 bg-background rounded-2xl p-4">
+                <div className="flex items-center justify-between w-full">
+                  <div className="">
+                    <h1 className="text-muted-foreground text-2xl md:text-3xl mx-2 md:mx-0">
+                      Add Member
+                    </h1>
+                    <p className="text-muted-foreground text-sm mx-2 md:mx-0">
+                      Add a member to the circle by pasting their address below.
+                    </p>
+                  </div>
+                  <X
+                    className="w-6 h-6 cursor-pointer text-muted-foreground"
+                    onClick={() => setAddMemberModal(false)}
+                  />
+                </div>
+                <Input
+                  placeholder="Address"
+                  value={addMemberAddress}
+                  onChange={(e) => setAddMemberAddress(e.target.value)}
+                  className="bg-background border border-gray-700 rounded-2xl p-2 w-full md:w-1/2 mt-4 h-12 placeholder:text-gray-400"
+                />
+                <button
+                  onClick={() => onAddMember(addMemberAddress)}
+                  className="text-sm font-bold w-full md:w-1/2 text-center justify-center mt-4 bg-transparent text-primary border border-primary rounded-3xl py-2 px-4 flex items-center gap-1"
+                >
+                  {isAddMemberPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    "Approve Member"
+                  )}
+                </button>
               </div>
             </motion.div>
           </motion.div>

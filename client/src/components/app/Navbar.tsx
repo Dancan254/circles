@@ -85,6 +85,7 @@ function Navbar() {
                     <div
                       className="flex items-center  justify-between my-1 cursor-pointer"
                       onClick={() => handleNetworkChange(network)}
+                      key={network.name}
                     >
                       <div className="flex items-center gap-2">
                         <img

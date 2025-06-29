@@ -67,7 +67,12 @@ export function getEcosystemImage(ecosystem: string): string {
   }
 }
 
-export function convertBalance(balance: BigInt | undefined) {
+export function convertBalance(balance: bigint | undefined) {
   if (!balance) return 0;
   return Number(balance) / 10 ** TOKEN_DECIMALS;
+}
+
+export function convertBalanceToWei(balance: number | undefined): bigint {
+  if (!balance) return BigInt(0);
+  return BigInt(balance) * BigInt(10 ** TOKEN_DECIMALS);
 }

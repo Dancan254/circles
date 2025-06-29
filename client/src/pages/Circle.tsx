@@ -37,6 +37,8 @@ import useGetDeployedCapital from "@/hooks/useGetDeployedCaptial";
 import useAddMember from "@/hooks/useAddMember";
 import useDeployIdleFunds from "@/hooks/useDeployIdleFunds";
 import useRequestWithdrawal from "@/hooks/useRequestWithdrawal";
+import useMembers from "@/hooks/useMembers";
+import MemberCard from "@/components/app/MemberCard";
 
 function Circle() {
   const { address } = useParams();
@@ -68,6 +70,9 @@ function Circle() {
 
   const { onRequestWithdrawal, isPending: isRequestWithdrawalPending } =
     useRequestWithdrawal();
+
+  const { data: members, isLoading: isMembersLoading } = useMembers();
+  console.log(members);
 
   if (isLoading) {
     return <Loading size="lg" />;
@@ -248,8 +253,40 @@ function Circle() {
           </motion.p>
         </div>
       </div>
+      <div className="flex flex-col gap-2 mb-8">
+        <motion.h1
+          className="text-muted-foreground text-2xl md:text-3xl mx-2 my-4 md:mx-0 mt-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
+        >
+          Members
+        </motion.h1>
+        {isMembersLoading ? (
+          <Loading size="lg" />
+        ) : (
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mx-2 md:mx-0"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: {},
+              visible: {
+                transition: {
+                  staggerChildren: 0.1,
+                  delayChildren: 0.5,
+                },
+              },
+            }}
+          >
+            {members?.map((member) => {
+              return <MemberCard key={member} address={member} />;
+            })}
+          </motion.div>
+        )}
+      </div>
       <motion.div
-        className="max-w-7xl mx-auto mt-8"
+        className="max-w-7xl mx-auto mt-12"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}

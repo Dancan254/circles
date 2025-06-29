@@ -1,5 +1,13 @@
 import circle from "@/assets/images/pool.png";
 import avax from "@/assets/lottie/avax.png";
+import member1 from "@/assets/images/member1.jpeg";
+import member2 from "@/assets/images/member2.jpeg";
+import member3 from "@/assets/images/member3.png";
+import member4 from "@/assets/images/member4.png";
+import member5 from "@/assets/images/member5.png";
+import member6 from "@/assets/images/member6.png";
+import member7 from "@/assets/images/member7.png";
+import member8 from "@/assets/images/member8.avif";
 
 export const ROLE =
   "0x0eef666beafdac323f3c3096f2bd07e212d61fe2936864cef12d518ed6522f83";
@@ -12,6 +20,17 @@ export const CIRCLE_DISPATCHER_ADDRESS =
 export const PROTOCOL_ADDRESS = "0xC089C6574bA12ef9Db724757Fd3886Ed49940e1f";
 export const DESTINATION_CHAIN_SELECTOR = "16015286601757825753";
 export const MOCK_VAULT_ADDRESS = "0xB96C5d0a79B7901A49DB43782CdD8E35720971Be";
+
+export const images = [
+  member1,
+  member2,
+  member3,
+  member4,
+  member5,
+  member6,
+  member7,
+  member8,
+];
 
 export interface Network {
   name: string;
@@ -197,3 +216,5 @@ export interface Txn {
   type: string;
   status: boolean;
 }
+
+export const avalanche = networks[0];

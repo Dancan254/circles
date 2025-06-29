@@ -35,6 +35,12 @@ export const protocolContract = getContract({
   address: PROTOCOL_ADDRESS,
 });
 
+// export const vaultContract = getContract({
+//   client,
+//   chain: defineChain(43113),
+//   address: MOCK_VAULT_ADDRESS,
+// });
+
 export const myChain = defineChain({
   id: 43113,
   name: "Mock Avalanche",

@@ -65,7 +65,7 @@ function CircleCard({ circle }: { circle: Circle }) {
               className="text-primary text-lg flex items-center gap-1"
               onClick={() => {
                 window.open(
-                  `https://snowtrace.io/address/${circle.address}`,
+                  `https://testnet.snowtrace.io/address/${circle.address}`,
                   "_blank"
                 );
               }}

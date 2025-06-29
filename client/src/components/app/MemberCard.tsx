@@ -67,15 +67,15 @@ function MemberCard({ address }: { address: string }) {
         </div>
         <div className="flex items-center justify-between mt-2">
           <p className="text-muted-foreground text-md">
-            Contributed:{" "}
             <span className="text-primary">
               {userContributedLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 convertBalance(userContributed).toFixed(0)
               )}{" "}
-              USDC
+              USDC{" "}
             </span>
+            Contributed
           </p>
           <p className="text-muted-foreground text-sm">
             Balance:{" "}

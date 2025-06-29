@@ -62,6 +62,7 @@ public class TransactionService {
      * @param transaction The transaction to process
      * @return true if processed successfully, false otherwise
      */
+
     @Transactional
     public boolean processTransaction(CryptoTransaction transaction) {
         try {
@@ -87,7 +88,14 @@ public class TransactionService {
                     transactionRepository.save(transaction);
                     return true;
                 } else {
-                    log.error("Failed to credit wallet for transaction: {}",
+                    // For development only:
+                    // Mark as processed but with a special status to avoid endless retries
+                    transaction.setTransactionStatus("BLOCKCHAIN_ERROR");
+                    transaction.setProcessed(true); // Mark as processed to stop retries
+                    transaction.setProcessedAt(LocalDateTime.now());
+                    transactionRepository.save(transaction);
+
+                    log.error("Failed to credit wallet for transaction: {}. Please check blockchain service logs.",
                             transaction.getCheckoutRequestId());
                     return false;
                 }

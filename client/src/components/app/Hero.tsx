@@ -6,9 +6,9 @@ import { useNavigate } from "react-router-dom";
 function Hero() {
   const navigate = useNavigate();
   return (
-    <div className="flex flex-col items-center justify-center text-center h-screen">
+    <div className="flex flex-col items-center justify-center text-center h-full">
       <motion.h1
-        className="text-4xl font-bold text-center mt-32 md:mt-0"
+        className="text-4xl font-bold text-center md:mt-0 mt-12"
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: "easeOut" }}

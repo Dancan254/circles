@@ -3,8 +3,9 @@ import { getContract } from "thirdweb";
 import { defineChain } from "thirdweb";
 import { createThirdwebClient } from "thirdweb";
 
-const clientId = import.meta.env.VITE_CLIENT_ID;
-const secretKey = import.meta.env.VITE_SECRET_KEY;
+const clientId = "e7c8824f4ac35a5d95af9a90be42f461";
+const secretKey =
+  "Z8dbpHxaUqVxNwzVxYLNE-IrbNzp8mXmeoBQx8ZZM88OaL2WPdHLkGOLjUVox_Rc6Bv8Ic5or7P6XNEzmgH5Xg";
 
 if (!clientId || !secretKey) {
   throw new Error(

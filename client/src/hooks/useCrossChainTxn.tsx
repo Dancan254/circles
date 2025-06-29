@@ -1,7 +1,7 @@
 import type { CrossChainTxn } from "@/mock";
 import { useQuery } from "@tanstack/react-query";
 
-const API_URL = import.meta.env.VITE_BACKEND_URL;
+const API_URL = "https://circles-api.onrender.com/api/cross-chain-txn?address=";
 
 if (!API_URL) {
   throw new Error("VITE_BACKEND_URL is not set");

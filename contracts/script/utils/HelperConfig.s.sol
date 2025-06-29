@@ -34,6 +34,7 @@ contract HelperConfig is Script {
     address public VRFCoordinatorFuji = 0x5C210eF41CD1a72de73bF76eC39637bB0d3d7BEE;
     address public FujiCircleAddressOld = 0xb8c7fb66D2f2d71F47378CAcA7f9ca32008F3286;
     address public FujiCircleAddress = 0x2B17ec13D1E6bA06d06B39e02d0ad7FaE33D6520;
+    address public FujiRampingAddress = 0x964A2c9313A294360589dCCd9A19c4c1B60e40aF;
 
     constructor() {
         if (block.chainid == 11155111) {

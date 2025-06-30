@@ -99,15 +99,18 @@ sequenceDiagram
 
 ### Avalanche Fuji (Chain ID: 43113)
 
-| Contract            | Address                                      | Purpose                                      |
-| ------------------- | -------------------------------------------- | -------------------------------------------- |
-| **USDC Token**      | `0x60A15CA6b63508562d0Cdc9Cf896A9e3bBF79463` | Cross-chain USDC with burn/mint capabilities |
-| **Token Pool**      | `0x2D9bf08C367fe7CF2d5d76E43fCFE46cE7660691` | CCIP token pool for cross-chain transfers    |
-| **YieldDispatcher** | `0xa3e73B9E6261A950616881a8A084842efB9bdC49` | Manages cross-chain fund deployment          |
-| **Circle Contract** | `0x57a867C0410c98C1BF637D933B46367E489088DF` | Main ROSCA implementation                    |
-| **Mock Vault**      | `0xFfabAdA8EDfdF406a95Beb95ef456ED9287b272D` | ERC4626 vault for yield generation           |
-| **VRF Coordinator** | `0x5C210eF41CD1a72de73bF76eC39637bB0d3d7BEE` | Chainlink VRF coordinator for randomness     |
-| **Token Admin**     | `0x0bd7dd9A885d9526Ff82813829ef5c7D8AfdB8c4` | Token administrator address                  |
+| Contract                      | Address                                      | Purpose                                      |
+| ----------------------------- | -------------------------------------------- | -------------------------------------------- |
+| **USDC Token**                | `0x60A15CA6b63508562d0Cdc9Cf896A9e3bBF79463` | Cross-chain USDC with burn/mint capabilities |
+| **Token Pool**                | `0x2D9bf08C367fe7CF2d5d76E43fCFE46cE7660691` | CCIP token pool for cross-chain transfers    |
+| **YieldDispatcher (Current)** | `0xC089C6574bA12ef9Db724757Fd3886Ed49940e1f` | Manages cross-chain fund deployment          |
+| **YieldDispatcher (Legacy)**  | `0xa3e73B9E6261A950616881a8A084842efB9bdC49` | Legacy yield dispatcher contract             |
+| **Circle Contract (Current)** | `0x2B17ec13D1E6bA06d06B39e02d0ad7FaE33D6520` | Main ROSCA implementation                    |
+| **Circle Contract (Legacy)**  | `0xb8c7fb66D2f2d71F47378CAcA7f9ca32008F3286` | Legacy circle contract                       |
+| **Ramping Contract**          | `0x964A2c9313A294360589dCCd9A19c4c1B60e40aF` | M-Pesa on-ramp integration                   |
+| **Mock Vault**                | `0xFfabAdA8EDfdF406a95Beb95ef456ED9287b272D` | ERC4626 vault for yield generation           |
+| **VRF Coordinator**           | `0x5C210eF41CD1a72de73bF76eC39637bB0d3d7BEE` | Chainlink VRF coordinator for randomness     |
+| **Token Admin**               | `0x0bd7dd9A885d9526Ff82813829ef5c7D8AfdB8c4` | Token administrator address                  |
 
 ### Network Configuration
 
@@ -312,8 +315,15 @@ make check-withdraw-status
 #### CCIP Message Tracking
 
 - **CCIP Explorer**: [https://ccip.chain.link](https://ccip.chain.link)
+- **YieldDispatcher Messages**: [Monitor Cross-Chain Messages](https://ccip.chain.link/address/0xc089c6574ba12ef9db724757fd3886ed49940e1f)
+- **YieldExecutor Messages**: [Monitor Cross-Chain Messages](https://ccip.chain.link/address/0x35b8c50ae752414c0e1ff49ed774763124e4bff2)
 - Messages include unique messageId for tracking
 - View cross-chain transaction status and confirmations
+
+#### Chainlink Service Monitoring
+
+- **Automation Subscription**: [View Automation Jobs](https://automation.chain.link/fuji/76394079915856139654718637563425701007204098006936257598902642327442237899251)
+- **VRF Subscription**: [Monitor VRF Requests](https://vrf.chain.link/fuji#/side-drawer/subscription/fuji/95146456061241003931204753590406782271085106328724916502175555284183410948430)
 
 #### Contract Verification
 
@@ -346,29 +356,6 @@ The system includes comprehensive integration tests covering:
 - Token bridging and minting/burning
 - Yield strategy execution
 - Emergency scenarios
-
-## 🚧 Development Roadmap
-
-### Phase 1: Core Enhancement (In Progress)
-
-- [ ] Multi-protocol yield strategy integration (Aave, Compound)
-- [ ] Dynamic yield optimization based on rates
-- [ ] Minimum member enforcement (5 members)
-- [ ] Contribution period validation
-
-### Phase 2: Advanced Features
-
-- [ ] Automated yield compounding
-- [ ] Cross-chain governance system
-- [ ] Multi-token support beyond USDC
-- [ ] Mobile-friendly frontend integration
-
-### Phase 3: Production Ready
-
-- [ ] Mainnet deployment preparation
-- [ ] Comprehensive security audits
-- [ ] Gas optimization across all contracts
-- [ ] Advanced monitoring and alerting
 
 ## 📁 Project Structure
 
@@ -446,8 +433,8 @@ contracts/
 // USDC Token with burn/mint capabilities
 contract BurnMintUsdc is BurnMintERC20 {
     // Deterministic deployment via CREATE2
-    // Same address on Sepolia: 0x0731a41e4caf92D586267230Be3b8718422ba329
-    // Same address on Fuji: 0x0731a41e4caf92D586267230Be3b8718422ba329
+    // Same address on Sepolia: 0x60A15CA6b63508562d0Cdc9Cf896A9e3bBF79463
+    // Same address on Fuji: 0x60A15CA6b63508562d0Cdc9Cf896A9e3bBF79463
 }
 
 // Cross-chain token pool for CCIP
@@ -477,8 +464,8 @@ contract Circle is AccessControl, VRFConsumerBaseV2Plus {
 
 | Network          | Chain ID | CCIP Chain Selector  | USDC Token Address                         |
 | ---------------- | -------- | -------------------- | ------------------------------------------ |
-| Ethereum Sepolia | 11155111 | 16015286601757825753 | 0x0731a41e4caf92D586267230Be3b8718422ba329 |
-| Avalanche Fuji   | 43113    | 14767482510784806043 | 0x0731a41e4caf92D586267230Be3b8718422ba329 |
+| Ethereum Sepolia | 11155111 | 16015286601757825753 | 0x60A15CA6b63508562d0Cdc9Cf896A9e3bBF79463 |
+| Avalanche Fuji   | 43113    | 14767482510784806043 | 0x60A15CA6b63508562d0Cdc9Cf896A9e3bBF79463 |
 
 ### 📋 Key Functions Implemented
 

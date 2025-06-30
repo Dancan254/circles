@@ -318,6 +318,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**⚡ Built for the Chainlink Chromium Hackathon**
-
 _Bridging traditional African finance with cutting-edge DeFi technology_

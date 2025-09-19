@@ -52,3 +52,37 @@ export const myChain = defineChain({
     decimals: 18,
   },
 });
+
+export const liskTestnet = defineChain({
+  id: 4202,
+  name: "Lisk Testnet",
+  rpc: `https://4202.rpc.thirdweb.com/${secretKey}`,
+  nativeCurrency: {
+    name: "Sepolia Ether (ETH)",
+    symbol: "ETH",
+    decimals: 18,
+  },
+  blockExplorers: [
+    {
+      name: "Blockscout",
+      url: "https://sepolia-blockscout.lisk.com/",
+    },
+  ],
+});
+
+export const lisk = defineChain({
+  id: 1135,
+  name: "Lisk Mainnet",
+  rpc: `https://1135.rpc.thirdweb.com/${secretKey}`,
+  nativeCurrency: {
+    name: "Ether",
+    symbol: "ETH",
+    decimals: 18,
+  },
+  blockExplorers: [
+    {
+      name: "Blockscout",
+      url: "https://blockscout.lisk.com/",
+    },
+  ],
+});

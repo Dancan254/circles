@@ -3,18 +3,28 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { networks } from "@/mock";
-import { ConnectButton } from "thirdweb/react";
+import { ConnectButton, useSwitchActiveWalletChain } from "thirdweb/react";
 import { client } from "@/lib/client";
-import { sepolia, avalancheFuji } from "thirdweb/chains";
+import { liskTestnet, lisk } from "@/lib/client";
 import logo from "../../assets/images/circles-dark.png";
+
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState(networks[0]);
   const navigate = useNavigate();
+  const switchActiveWalletChain = useSwitchActiveWalletChain();
 
   const handleNetworkChange = (network: { name: string; icon: string }) => {
     setSelectedNetwork(network);
+    switch (network.name) {
+      case "Lisk Testnet":
+        switchActiveWalletChain(liskTestnet);
+        break;
+      case "Lisk Mainnet":
+        switchActiveWalletChain(lisk);
+        break;
+    }
     setIsOpen(false);
   };
   return (
@@ -52,7 +62,7 @@ function Navbar() {
               paddingTop: "10px",
             },
           }}
-          chains={[avalancheFuji, sepolia]}
+          chains={[liskTestnet, lisk]}
           connectModal={{
             title: "Sign in to Circles",
             titleIcon: logo,

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 function Hero() {
   const navigate = useNavigate();
   return (
-    <div className="flex flex-col items-center justify-center text-center h-full">
+    <div className="flex flex-col items-center justify-center text-center h-screen">
       <motion.h1
         className="text-4xl font-bold text-center md:mt-0 mt-12"
         initial={{ opacity: 0, y: 40 }}
